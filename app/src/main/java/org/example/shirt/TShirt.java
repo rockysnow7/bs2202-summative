@@ -1,16 +1,14 @@
-package org.example.clothing;
-
-import org.example.enums.CuffStyle;
-import org.example.enums.NeckType;
-import org.example.enums.SleeveType;
-import org.example.settings.RestockSettings;
+package org.example.shirt;
 
 import java.time.LocalDate;
+import org.example.settings.RestockSettings;
+import org.example.enums.SleeveType;
+import org.example.enums.NeckType;
 
-class ButtonUpShirt extends Shirt {
-    public CuffStyle cuffStyle;
+class TShirt extends Shirt {
+    public boolean hasGraphic;
 
-    public ButtonUpShirt(
+    public TShirt(
         int id,
         String name,
         String brand,
@@ -25,9 +23,9 @@ class ButtonUpShirt extends Shirt {
         NeckType neckType,
         String pattern,
         int numPockets,
-        CuffStyle cuffStyle
+        boolean hasGraphic
     ) {
         super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath, sleeveType, neckType, pattern, numPockets);
-        this.cuffStyle = cuffStyle;
+        this.hasGraphic = hasGraphic;
     }
 }

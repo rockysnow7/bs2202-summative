@@ -1,9 +1,10 @@
-package org.example.clothing;
+package org.example.shirt;
 
 import java.time.LocalDate;
 import org.example.settings.RestockSettings;
 import org.example.enums.SleeveType;
 import org.example.enums.NeckType;
+import org.example.clothing.Clothing;
 import org.example.enums.FormalityLevel;
 
 public abstract class Shirt extends Clothing {
