@@ -3,11 +3,26 @@
  */
 package org.example.main;
 
+import org.example.database.DatabaseConnection;
+import org.example.enums.UserType;
+import org.example.requests.AccountCreationRequest;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
@@ -16,19 +31,332 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class App extends Application {
+    DatabaseConnection databaseConnection = new DatabaseConnection();
+    int userId = -1;
+
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        stage.setTitle("Hello World");
+    // Returns the SHA-256 hash of a given password.
+    private static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
 
-        GridPane grid = new GridPane();
+            return String.format("%064x", new BigInteger(1, hashBytes));
+        } catch (NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    // Returns true if the username is valid, false otherwise.
+    private static boolean isUsernameValid(String username) {
+        return username.length() > 0 && username.length() <= 40;
+    }
+
+    // Returns true if the username is already taken, false otherwise.
+    private boolean isUsernameTaken(String username) {
+        ArrayList<String> userUsernames = databaseConnection.getAllUsernames();
+        ArrayList<String> accountCreationRequestsUsernames = databaseConnection
+            .getAllAccountCreationRequests()
+            .stream()
+            .map(request -> request.username)
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        return userUsernames.contains(username) || accountCreationRequestsUsernames.contains(username);
+    }
+
+    // Returns true if the password is valid, false otherwise.
+    private static boolean isPasswordValid(String password) {
+        return password.length() > 0;
+    }
+
+    // Styles a given `GridPane` (to maintain consistency).
+    private void styleGrid(GridPane grid) {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
+        grid.setPadding(new Insets(10, 25, 25, 10));
+    }
+
+    // Displays the view account creation requests page.
+    private void showViewAccountCreationRequestsPage(Stage stage) throws Exception {
+        stage.setTitle("Manage Account Creation Requests");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showMainPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Account Creation Requests");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        ListView<String> accountCreationRequestsListView = new ListView<>();
+        ArrayList<AccountCreationRequest> accountCreationRequests = databaseConnection.getAllAccountCreationRequests();
+        ArrayList<String> accountCreationRequestsUsernames = accountCreationRequests
+            .stream()
+            .map(request -> request.username)
+            .collect(Collectors.toCollection(ArrayList::new));
+        accountCreationRequestsListView.setItems(FXCollections.observableArrayList(accountCreationRequestsUsernames));
+        grid.add(accountCreationRequestsListView, 0, 2, 2, 1);
+
+        Button approveButton = new Button("Approve");
+        approveButton.setOnAction(e -> {
+            try {
+                int index = accountCreationRequestsListView.getSelectionModel().getSelectedIndex();
+                if (index == -1) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("No account creation request selected.");
+                    alert.showAndWait();
+                    return;
+                }
+
+                // approve the request
+                AccountCreationRequest request = accountCreationRequests.get(index);
+                databaseConnection.approveAccountCreationRequest(request.requestId);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText("Account creation request approved.");
+                alert.showAndWait();
+
+                // remove the request from the list
+                accountCreationRequests.remove(index);
+                accountCreationRequestsUsernames.remove(index);
+                accountCreationRequestsListView.setItems(FXCollections.observableArrayList(accountCreationRequestsUsernames));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(approveButton, 0, 3);
+
+        Button denyButton = new Button("Deny");
+        denyButton.setOnAction(e -> {
+            try {
+                int index = accountCreationRequestsListView.getSelectionModel().getSelectedIndex();
+                if (index == -1) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("No account creation request selected.");
+                    alert.showAndWait();
+                    return;
+                }
+
+                // deny the request
+                AccountCreationRequest request = accountCreationRequests.get(index);
+                databaseConnection.denyAccountCreationRequest(request.requestId);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText("Account creation request denied.");
+                alert.showAndWait();
+
+                // remove the request from the list
+                accountCreationRequests.remove(index);
+                accountCreationRequestsUsernames.remove(index);
+                accountCreationRequestsListView.setItems(FXCollections.observableArrayList(accountCreationRequestsUsernames));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(denyButton, 1, 3);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // Displays the main page.
+    private void showMainPage(Stage stage) throws Exception {
+        stage.setTitle("Main");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button logOutButton = new Button("Log Out");
+        logOutButton.setOnAction(e -> {
+            try {
+                userId = -1;
+                showStartPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(logOutButton, 0, 0);
+
+        Text sceneTitle = new Text("Main");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        UserType userType = databaseConnection.getUserTypeOfUser(userId);
+        if (userType == UserType.ADMIN) {
+            Button viewAccountCreationRequestsButton = new Button("View Account Creation Requests");
+            viewAccountCreationRequestsButton.setOnAction(e -> {
+                try {
+                    showViewAccountCreationRequestsPage(stage);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(viewAccountCreationRequestsButton, 0, 2);
+        }
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // Displays the log in page.
+    private void showLogInPage(Stage stage) throws Exception {
+        stage.setTitle("Log In");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showStartPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Log In");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        Label usernameLabel = new Label("Username:");
+        grid.add(usernameLabel, 0, 2);
+
+        TextField usernameInput = new TextField();
+        grid.add(usernameInput, 1, 2);
+
+        Label passwordLabel = new Label("Password:");
+        grid.add(passwordLabel, 0, 3);
+
+        PasswordField passwordInput = new PasswordField();
+        grid.add(passwordInput, 1, 3);
+
+        Button logInButton = new Button("Log In");
+        logInButton.setOnAction(e -> {
+            String username = usernameInput.getText();
+            String password = passwordInput.getText();
+            String hashedPassword = hashPassword(password);
+
+            int userId = databaseConnection.validateLogin(username, hashedPassword);
+            if (userId != -1) {
+                try {
+                    this.userId = userId;
+                    showMainPage(stage);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Incorrect username or password </3");
+                alert.showAndWait();
+            }
+        });
+        grid.add(logInButton, 1, 4);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // Displays the account creation request page.
+    private void showCreateAccountRequestPage(Stage stage) throws Exception {
+        stage.setTitle("Request Account Creation");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showStartPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Request Account Creation");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        Label usernameLabel = new Label("Username:");
+        grid.add(usernameLabel, 0, 2);
+
+        TextField usernameInput = new TextField();
+        grid.add(usernameInput, 1, 2);
+
+        Label passwordLabel = new Label("Password:");
+        grid.add(passwordLabel, 0, 3);
+
+        PasswordField passwordInput = new PasswordField();
+        grid.add(passwordInput, 1, 3);
+        
+        Button requestButton = new Button("Request Account Creation");
+        requestButton.setOnAction(e -> {
+            String username = usernameInput.getText();
+            String password = passwordInput.getText();
+            if (!isUsernameValid(username)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid username: username must be between 1 and 40 characters.");
+                alert.showAndWait();
+                return;
+            }
+            if (isUsernameTaken(username)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Username already taken: please choose another username.");
+                alert.showAndWait();
+                return;
+            }
+            if (!isPasswordValid(password)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid password: password must be at least 1 character.");
+                alert.showAndWait();
+                return;
+            }
+
+            String hashedPassword = hashPassword(password);
+
+            databaseConnection.createAccountCreationRequest(username, hashedPassword);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Account Creation Request");
+            alert.setHeaderText("Account creation request sent <3");
+            alert.showAndWait();
+        });
+        grid.add(requestButton, 1, 4);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // Displays the start page.
+    private void showStartPage(Stage stage) throws Exception {
+        stage.setTitle("Stock Management System");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
 
         Text sceneTitle = new Text("Welcome");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -37,12 +365,31 @@ public class App extends Application {
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
 
-        Label usernameLabel = new Label("Username:");
-        grid.add(usernameLabel, 0, 1);
+        Button logInButton = new Button("Log In");
+        logInButton.setOnAction(e -> {
+            try {
+                showLogInPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(logInButton, 0, 2);
 
-        TextField usernameInput = new TextField();
-        grid.add(usernameInput, 1, 1);
+        Button createAccountRequestButton = new Button("Create Account Request");
+        createAccountRequestButton.setOnAction(e -> {
+            try {
+                showCreateAccountRequestPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(createAccountRequestButton, 0, 3);
 
         stage.show();
+    }
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        showStartPage(stage);
     }
 }
