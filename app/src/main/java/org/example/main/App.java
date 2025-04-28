@@ -34,6 +34,7 @@ import javafx.stage.Stage;
 
 public class App extends Application {
     DatabaseConnection databaseConnection = new DatabaseConnection();
+    // The ID of the currently logged in user. If no user is logged in, it is -1.
     int userId = -1;
 
     public static void main(String[] args) {
@@ -287,9 +288,9 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the view items page.
-    private void showViewItemsPage(Stage stage) throws Exception {
-        stage.setTitle("View Items");
+    // Displays the manage items page.
+    private void showManageItemsPage(Stage stage) throws Exception {
+        stage.setTitle("Manage Items");
 
         GridPane grid = new GridPane();
         styleGrid(grid);
@@ -304,7 +305,7 @@ public class App extends Application {
         });
         grid.add(backButton, 0, 0);
 
-        Text sceneTitle = new Text("View Items");
+        Text sceneTitle = new Text("Manage Items");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
         
@@ -335,15 +336,15 @@ public class App extends Application {
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
 
-        Button viewItemsButton = new Button("View Items");
-        viewItemsButton.setOnAction(e -> {
+        Button manageItemsButton = new Button("Manage Items");
+        manageItemsButton.setOnAction(e -> {
             try {
-                showViewItemsPage(stage);
+                showManageItemsPage(stage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
-        grid.add(viewItemsButton, 0, 2);
+        grid.add(manageItemsButton, 0, 2);
 
         UserType userType = databaseConnection.getUserTypeOfUser(userId);
         if (userType == UserType.ADMIN) {
