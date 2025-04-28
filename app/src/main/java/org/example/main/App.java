@@ -6,6 +6,8 @@ package org.example.main;
 import org.example.database.DatabaseConnection;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
+import org.example.user.User;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -58,7 +60,11 @@ public class App extends Application {
 
     // Returns true if the username is already taken, false otherwise.
     private boolean isUsernameTaken(String username) {
-        ArrayList<String> userUsernames = databaseConnection.getAllUsernames();
+        ArrayList<User> users = databaseConnection.getAllUsers();
+        ArrayList<String> userUsernames = users
+            .stream()
+            .map(user -> user.username)
+            .collect(Collectors.toCollection(ArrayList::new));
         ArrayList<String> accountCreationRequestsUsernames = databaseConnection
             .getAllAccountCreationRequests()
             .stream()
@@ -176,6 +182,111 @@ public class App extends Application {
         stage.show();
     }
 
+    // Displays the edit privileges page.
+    private void showEditPrivilegesPage(Stage stage) throws Exception {
+        stage.setTitle("Edit Privileges");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showMainPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Edit Privileges");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        ListView<String> usersListView = new ListView<>();
+        ArrayList<User> users = databaseConnection
+            .getAllUsers()
+            .stream()
+            .filter(user -> user.userId != userId)
+            .collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> displayUsers = users
+            .stream()
+            .map(user -> String.format("%s (%s)", user.username, user.userType))
+            .collect(Collectors.toCollection(ArrayList::new));
+        usersListView.setItems(FXCollections.observableArrayList(displayUsers));
+        grid.add(usersListView, 0, 2, 2, 1);
+
+        Button promoteButton = new Button("Promote");
+        promoteButton.setOnAction(e -> {
+            int index = usersListView.getSelectionModel().getSelectedIndex();
+            if (index == -1) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("No user selected.");
+                alert.showAndWait();
+                return;
+            }
+
+            User user = users.get(index);
+            if (user.userType == UserType.ADMIN) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot promote admin.");
+                alert.showAndWait();
+                return;
+            }
+
+            databaseConnection.setUserTypeOfUser(user.userId, UserType.ADMIN);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText("User promoted to admin.");
+            alert.showAndWait();
+
+            // update the list
+            users.set(index, new User(user.userId, user.username, user.passwordHash, UserType.ADMIN));
+            displayUsers.set(index, String.format("%s (%s)", user.username, UserType.ADMIN));
+            usersListView.setItems(FXCollections.observableArrayList(displayUsers));
+        });
+        grid.add(promoteButton, 0, 3);
+
+        Button demoteButton = new Button("Demote");
+        demoteButton.setOnAction(e -> {
+            int index = usersListView.getSelectionModel().getSelectedIndex();
+            if (index == -1) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("No user selected.");
+                alert.showAndWait();
+                return;
+            }
+            
+            User user = users.get(index);
+            if (user.userType == UserType.STANDARD) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot demote standard user.");
+                alert.showAndWait();
+                return;
+            }
+
+            databaseConnection.setUserTypeOfUser(user.userId, UserType.STANDARD);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText("User demoted to standard.");
+            alert.showAndWait();
+
+            // update the list
+            users.set(index, new User(user.userId, user.username, user.passwordHash, UserType.STANDARD));
+            displayUsers.set(index, String.format("%s (%s)", user.username, UserType.STANDARD));
+            usersListView.setItems(FXCollections.observableArrayList(displayUsers));
+        });
+        grid.add(demoteButton, 1, 3);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     // Displays the main page.
     private void showMainPage(Stage stage) throws Exception {
         stage.setTitle("Main");
@@ -209,6 +320,16 @@ public class App extends Application {
                 }
             });
             grid.add(viewAccountCreationRequestsButton, 0, 2);
+
+            Button editPrivilegesButton = new Button("Edit Privileges");
+            editPrivilegesButton.setOnAction(e -> {
+                try {
+                    showEditPrivilegesPage(stage);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(editPrivilegesButton, 0, 3);
         }
 
         Scene scene = new Scene(grid, 300, 275);

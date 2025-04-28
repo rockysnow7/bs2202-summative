@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.example.settings.RestockSettings;
+import org.example.user.User;
 import org.example.clothing.Clothing;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
@@ -74,21 +75,21 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns a list of all usernames in the `users` table.
-    public ArrayList<String> getAllUsernames() {
+    // Returns a list of all users in the `users` table.
+    public ArrayList<User> getAllUsers() {
         try {
-            String query = "SELECT username FROM users";
+            String query = "SELECT * FROM users";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
                 try (ResultSet resultSet = statement.executeQuery()) {
-                    ArrayList<String> usernames = new ArrayList<>();
+                    ArrayList<User> users = new ArrayList<>();
                     while (resultSet.next()) {
-                        usernames.add(resultSet.getString("username"));
+                        users.add(new User(resultSet.getInt("user_id"), resultSet.getString("username"), null, UserType.valueOf(resultSet.getString("user_type"))));
                     }
-                    return usernames;
+                    return users;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting user usernames: " + e.getMessage());
+            System.err.println("Error getting users: " + e.getMessage());
             return null;
         }
     }
@@ -111,7 +112,16 @@ public class DatabaseConnection {
 
     // Sets the type of user for the given user ID in the `users` table.
     public void setUserTypeOfUser(int userId, UserType userType) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        try {
+            String query = "UPDATE users SET user_type = ? WHERE user_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setString(1, userType.toString());
+                statement.setInt(2, userId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error setting user type: " + e.getMessage());
+        }
     }
 
     // Tests if a user exists with the given username and password hash in the `users` table. Returns the user ID if the user exists, -1 otherwise.
