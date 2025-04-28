@@ -287,6 +287,32 @@ public class App extends Application {
         stage.show();
     }
 
+    // Displays the view items page.
+    private void showViewItemsPage(Stage stage) throws Exception {
+        stage.setTitle("View Items");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showMainPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("View Items");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+        
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     // Displays the main page.
     private void showMainPage(Stage stage) throws Exception {
         stage.setTitle("Main");
@@ -309,6 +335,16 @@ public class App extends Application {
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
 
+        Button viewItemsButton = new Button("View Items");
+        viewItemsButton.setOnAction(e -> {
+            try {
+                showViewItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(viewItemsButton, 0, 2);
+
         UserType userType = databaseConnection.getUserTypeOfUser(userId);
         if (userType == UserType.ADMIN) {
             Button viewAccountCreationRequestsButton = new Button("View Account Creation Requests");
@@ -319,7 +355,7 @@ public class App extends Application {
                     ex.printStackTrace();
                 }
             });
-            grid.add(viewAccountCreationRequestsButton, 0, 2);
+            grid.add(viewAccountCreationRequestsButton, 0, 3);
 
             Button editPrivilegesButton = new Button("Edit Privileges");
             editPrivilegesButton.setOnAction(e -> {
@@ -329,7 +365,7 @@ public class App extends Application {
                     ex.printStackTrace();
                 }
             });
-            grid.add(editPrivilegesButton, 0, 3);
+            grid.add(editPrivilegesButton, 0, 4);
         }
 
         Scene scene = new Scene(grid, 300, 275);
@@ -496,7 +532,7 @@ public class App extends Application {
         });
         grid.add(logInButton, 0, 2);
 
-        Button createAccountRequestButton = new Button("Create Account Request");
+        Button createAccountRequestButton = new Button("Request Account Creation");
         createAccountRequestButton.setOnAction(e -> {
             try {
                 showCreateAccountRequestPage(stage);
