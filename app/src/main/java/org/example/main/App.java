@@ -288,6 +288,58 @@ public class App extends Application {
         stage.show();
     }
 
+    // Displays the buy/sell items page.
+    private void showBuySellItemsPage(Stage stage) throws Exception {
+        stage.setTitle("Buy/Sell Items");
+        
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showManageItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Buy/Sell Items");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    // Displays the set minimum stock page.
+    private void showSetMinimumStockPage(Stage stage) throws Exception {
+        stage.setTitle("Set Minimum Stock");
+        
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showManageItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Set Minimum Stock");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     // Displays the manage items page.
     private void showManageItemsPage(Stage stage) throws Exception {
         stage.setTitle("Manage Items");
@@ -308,7 +360,27 @@ public class App extends Application {
         Text sceneTitle = new Text("Manage Items");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
-        
+
+        Button buySellButton = new Button("Buy/Sell Items");
+        buySellButton.setOnAction(e -> {
+            try {
+                showBuySellItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(buySellButton, 0, 2);
+
+        Button setMinimumStockButton = new Button("Set Minimum Stock");
+        setMinimumStockButton.setOnAction(e -> {
+            try {
+                showSetMinimumStockPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(setMinimumStockButton, 1, 2);
+
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
         stage.show();
