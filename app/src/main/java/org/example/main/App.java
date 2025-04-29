@@ -3,6 +3,7 @@
  */
 package org.example.main;
 
+import org.example.clothing.Clothing;
 import org.example.database.DatabaseConnection;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
@@ -308,6 +309,8 @@ public class App extends Application {
         Text sceneTitle = new Text("Buy/Sell Items");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
+
+        ArrayList<Clothing> items = databaseConnection.getAllItems();
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);

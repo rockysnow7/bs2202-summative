@@ -1,10 +1,12 @@
 package org.example.settings;
 
 public class RestockSettings {
+    private int itemId;
     private boolean restockAutomatically;
     private int minimumStockQuantity;
 
-    public RestockSettings(boolean restockAutomatically, int minimumStockQuantity) {
+    public RestockSettings(int itemId, boolean restockAutomatically, int minimumStockQuantity) {
+        this.itemId = itemId;
         this.restockAutomatically = restockAutomatically;
         this.minimumStockQuantity = minimumStockQuantity;
     }

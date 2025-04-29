@@ -7,7 +7,7 @@ import org.example.settings.RestockSettings;
 
 import java.time.LocalDate;
 
-class ButtonUpShirt extends Shirt {
+public class ButtonUpShirt extends Shirt {
     public CuffStyle cuffStyle;
 
     public ButtonUpShirt(

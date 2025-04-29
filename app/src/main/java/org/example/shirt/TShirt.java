@@ -5,7 +5,7 @@ import org.example.settings.RestockSettings;
 import org.example.enums.SleeveType;
 import org.example.enums.NeckType;
 
-class TShirt extends Shirt {
+public class TShirt extends Shirt {
     public boolean hasGraphic;
 
     public TShirt(
