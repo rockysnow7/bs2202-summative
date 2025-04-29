@@ -253,6 +253,10 @@ public class DatabaseConnection {
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
                 statement.setInt(1, itemId);
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
                     boolean hasGraphic = resultSet.getBoolean("has_graphic");
 
                     return new TShirt(
@@ -286,6 +290,10 @@ public class DatabaseConnection {
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
                 statement.setInt(1, itemId);
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
                     CuffStyle cuffStyle = CuffStyle.valueOf(resultSet.getString("cuff_style"));
 
                     return new ButtonUpShirt(
@@ -319,6 +327,10 @@ public class DatabaseConnection {
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
                 statement.setInt(1, itemId);
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
                     String shirtType = resultSet.getString("shirt_type");
                     SleeveType sleeveType = SleeveType.valueOf(resultSet.getString("sleeve_type"));
                     NeckType neckType = NeckType.valueOf(resultSet.getString("neck_type"));

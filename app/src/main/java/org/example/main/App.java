@@ -311,6 +311,9 @@ public class App extends Application {
         grid.add(sceneTitle, 0, 1, 2, 1);
 
         ArrayList<Clothing> items = databaseConnection.getAllItems();
+        for (Clothing item : items) {
+            System.out.println(item.toString());
+        }
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
