@@ -7,14 +7,23 @@ import org.example.clothing.Clothing;
 import org.example.database.DatabaseConnection;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
+import org.example.shirt.ButtonUpShirt;
+import org.example.shirt.Shirt;
+import org.example.shirt.TShirt;
+import org.example.shoes.AthleticShoes;
+import org.example.shoes.DressShoes;
+import org.example.shoes.Shoes;
 import org.example.user.User;
 
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -27,6 +36,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -289,6 +300,59 @@ public class App extends Application {
         stage.show();
     }
 
+    // Returns the details of a given item as a string. Used by `showBuySellItemsPage`.
+    private static String getItemDetails(Clothing item) {
+        String itemDetails = "";
+        if (item instanceof Shirt) {
+            Shirt shirt = (Shirt) item;
+            itemDetails = String.format(
+                "Shirt: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nSleeve Type: %s, Neck Type: %s\nPattern: %s, Num Pockets: %d",
+                shirt.name,
+                shirt.brand,
+                shirt.size,
+                shirt.material,
+                shirt.dateLastBought.toString(),
+                shirt.stockQuantity,
+                shirt.sleeveType.toString(),
+                shirt.neckType.toString(),
+                shirt.pattern,
+                shirt.numPockets
+            );
+
+            if (shirt instanceof TShirt) {
+                TShirt tShirt = (TShirt) shirt;
+                itemDetails += String.format("\nHas Graphic: %b", tShirt.hasGraphic);
+            } else if (shirt instanceof ButtonUpShirt) {
+                ButtonUpShirt buttonUpShirt = (ButtonUpShirt) shirt;
+                itemDetails += String.format("\nCuff Style: %s", buttonUpShirt.cuffStyle.toString());
+            }
+        } else if (item instanceof Shoes) {
+            Shoes shoes = (Shoes) item;
+            itemDetails = String.format(
+                "Shoes: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nHeel Height: %s, Closure Type: %s, Sole Type: %s",
+                shoes.name,
+                shoes.brand,
+                shoes.size,
+                shoes.material,
+                shoes.dateLastBought.toString(),
+                shoes.stockQuantity,
+                shoes.heelHeight.toString(),
+                shoes.closureType.toString(),
+                shoes.soleType.toString()
+            );
+
+            if (shoes instanceof DressShoes) {
+                DressShoes dressShoes = (DressShoes) shoes;
+                itemDetails += String.format("\nToe Style: %s", dressShoes.toeStyle.toString());
+            } else if (shoes instanceof AthleticShoes) {
+                AthleticShoes athleticShoes = (AthleticShoes) shoes;
+                itemDetails += String.format("\nSport: %s", athleticShoes.sport);
+            }
+        }
+
+        return itemDetails;
+    }
+
     // Displays the buy/sell items page.
     private void showBuySellItemsPage(Stage stage) throws Exception {
         stage.setTitle("Buy/Sell Items");
@@ -311,8 +375,87 @@ public class App extends Application {
         grid.add(sceneTitle, 0, 1, 2, 1);
 
         ArrayList<Clothing> items = databaseConnection.getAllItems();
-        for (Clothing item : items) {
-            System.out.println(item.toString());
+        for (int i = 0; i < items.size(); i++) {
+            Clothing item = items.get(i);
+            
+            int itemTopRow = i * 3 + 2; // 3 rows per item, offset by 2 for the header and back button
+            
+            // display the item image and details
+            URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
+            ImageView imageView = new ImageView(imagePath.toExternalForm());
+            imageView.setFitWidth(100);
+            imageView.setFitHeight(100);
+            grid.add(imageView, 0, itemTopRow, 1, 1);
+
+            String itemDetails = getItemDetails(item);
+            Text itemDetailsText = new Text(itemDetails);
+            grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
+
+            // display buy input and button
+            Label buyQuantityLabel = new Label("Buy Quantity:");
+            grid.add(buyQuantityLabel, 0, itemTopRow + 1, 1, 1);
+            TextField buyQuantityInput = new TextField();
+            grid.add(buyQuantityInput, 1, itemTopRow + 1, 1, 1);
+
+            Button buyButton = new Button("Buy");
+            buyButton.setOnAction(e -> {
+                try {
+                    int buyQuantity = Integer.parseInt(buyQuantityInput.getText());
+                    databaseConnection.buyItem(item.id, buyQuantity);
+
+                    // update the item details string
+                    Clothing updatedItem = databaseConnection.getItemById(item.id);
+                    String updatedItemDetails = getItemDetails(updatedItem);
+                    itemDetailsText.setText(updatedItemDetails);
+
+                    // alert the user that the items have been bought
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setHeaderText("Items bought successfully.");
+                    alert.showAndWait();
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Invalid quantity: quantity must be a number.");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(buyButton, 2, itemTopRow + 1, 1, 1);
+
+            // display sell input and button
+            Label sellQuantityLabel = new Label("Sell Quantity:");
+            grid.add(sellQuantityLabel, 0, itemTopRow + 2, 1, 1);
+            TextField sellQuantityInput = new TextField();
+            grid.add(sellQuantityInput, 1, itemTopRow + 2, 1, 1);
+
+            Button sellButton = new Button("Sell");
+            sellButton.setOnAction(e -> {
+                try {
+                    int sellQuantity = Integer.parseInt(sellQuantityInput.getText());
+                    databaseConnection.sellItem(item.id, sellQuantity);
+
+                    // update the item details string
+                    Clothing updatedItem = databaseConnection.getItemById(item.id);
+                    String updatedItemDetails = getItemDetails(updatedItem);
+                    itemDetailsText.setText(updatedItemDetails);
+
+                    // alert the user that the items have been sold
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setHeaderText("Items sold successfully.");
+                    alert.showAndWait();
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Invalid quantity: quantity must be a number.");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(sellButton, 2, itemTopRow + 2, 1, 1);
         }
 
         Scene scene = new Scene(grid, 300, 275);

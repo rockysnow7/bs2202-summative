@@ -14,12 +14,19 @@ import org.example.shirt.ButtonUpShirt;
 import org.example.shirt.Shirt;
 import org.example.user.User;
 import org.example.clothing.Clothing;
+import org.example.enums.ClosureType;
 import org.example.enums.CuffStyle;
+import org.example.enums.HeelHeight;
 import org.example.enums.NeckType;
 import org.example.enums.SleeveType;
+import org.example.enums.SoleType;
+import org.example.enums.ToeStyle;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
 import org.example.shirt.TShirt;
+import org.example.shoes.AthleticShoes;
+import org.example.shoes.DressShoes;
+import org.example.shoes.Shoes;
 
 public class DatabaseConnection {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/clothingstore";
@@ -383,6 +390,137 @@ public class DatabaseConnection {
         }
     }
 
+    private DressShoes getDressShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
+        try {
+            String query = "SELECT * FROM dress_shoes WHERE item_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setInt(1, itemId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
+                    ToeStyle toeStyle = ToeStyle.valueOf(resultSet.getString("toe_style"));
+
+                    return new DressShoes(
+                        itemId,
+                        name,
+                        brand,
+                        size,
+                        colour,
+                        material,
+                        dateLastBought,
+                        stockQuantity,
+                        restockSettings,
+                        imagePath,
+                        soleType,
+                        closureType,
+                        heelHeight,
+                        toeStyle
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting dress shoes: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private AthleticShoes getAthleticShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
+        try {
+            String query = "SELECT * FROM athletic_shoes WHERE item_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setInt(1, itemId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
+                    String sport = resultSet.getString("sport");
+
+                    return new AthleticShoes(
+                        itemId,
+                        name,
+                        brand,
+                        size,
+                        colour,
+                        material,
+                        dateLastBought,
+                        stockQuantity,
+                        restockSettings,
+                        imagePath,
+                        soleType,
+                        closureType,
+                        heelHeight,
+                        sport
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting athletic shoes: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private Shoes getShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath) {
+        try {
+            String query = "SELECT * FROM shoes WHERE item_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setInt(1, itemId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        return null;
+                    }
+
+                    String shoeType = resultSet.getString("shoe_type");
+                    SoleType soleType = SoleType.valueOf(resultSet.getString("sole_type"));
+                    ClosureType closureType = ClosureType.valueOf(resultSet.getString("closure_type"));
+                    HeelHeight heelHeight = HeelHeight.valueOf(resultSet.getString("heel_height"));
+
+                    switch (shoeType) {
+                        case "DRESS_SHOES":
+                            return getDressShoes(
+                                itemId,
+                                name,
+                                brand,
+                                size,
+                                colour,
+                                material,
+                                dateLastBought,
+                                stockQuantity,
+                                restockSettings,
+                                imagePath,
+                                soleType,
+                                closureType,
+                                heelHeight
+                            );
+                        case "ATHLETIC_SHOES":
+                            return getAthleticShoes(
+                                itemId,
+                                name,
+                                brand,
+                                size,
+                                colour,
+                                material,
+                                dateLastBought,
+                                stockQuantity,
+                                restockSettings,
+                                imagePath,
+                                soleType,
+                                closureType,
+                                heelHeight
+                            );
+                        default:
+                            return null;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting shoes: " + e.getMessage());
+            return null;
+        }
+    }
+
     public ArrayList<Clothing> getAllItems() {
         try {
             String query = "SELECT * FROM items";
@@ -422,6 +560,21 @@ public class DatabaseConnection {
                                 }
                                 break;
                             case "SHOES":
+                                Shoes shoes = getShoes(
+                                    itemId,
+                                    name,
+                                    brand,
+                                    size,
+                                    colour,
+                                    material,
+                                    dateLastBought,
+                                    stockQuantity,
+                                    restockSettings,
+                                    imagePath
+                                );
+                                if (shoes != null) {
+                                    items.add(shoes);
+                                }
                                 break;
                         }
                     }
@@ -435,14 +588,95 @@ public class DatabaseConnection {
     }
 
     public Clothing getItemById(int id) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        String query = "SELECT * FROM items WHERE item_id = ?";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
+                }
+
+                int itemId = resultSet.getInt("item_id");
+                String itemType = resultSet.getString("item_type");
+                String name = resultSet.getString("name");
+                String brand = resultSet.getString("brand");
+                int size = resultSet.getInt("size");
+                String colour = resultSet.getString("colour");
+                String material = resultSet.getString("material");
+                LocalDate dateLastBought = resultSet.getDate("date_last_bought").toLocalDate();
+                int stockQuantity = resultSet.getInt("stock_quantity");
+                String imagePath = resultSet.getString("image_path");
+
+                RestockSettings restockSettings = getRestockSettings(itemId);
+
+                switch (itemType) {
+                    case "SHIRT":
+                        Shirt shirt = getShirt(
+                            itemId,
+                            name,
+                            brand,
+                            size,
+                            colour,
+                            material,
+                            dateLastBought,
+                            stockQuantity,
+                            restockSettings,
+                            imagePath
+                        );
+                        return shirt;
+                    case "SHOES":
+                        Shoes shoes = getShoes(
+                            itemId,
+                            name,
+                            brand,
+                            size,
+                            colour,
+                            material,
+                            dateLastBought,
+                            stockQuantity,
+                            restockSettings,
+                            imagePath
+                        );
+                        return shoes;
+                    default:
+                        return null;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting item by ID: " + e.getMessage());
+            return null;
+        }
     }
 
-    public void setItemStockQuantity(int id, int stockQuantity) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void buyItem(int itemId, int quantity) {
+        try {
+            String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
+            try (PreparedStatement quantityStatement = getConnection().prepareStatement(quantityQuery)) {
+                quantityStatement.setInt(1, quantity);
+                quantityStatement.setInt(2, itemId);
+                quantityStatement.executeUpdate();
+            }
+
+            String dateLastBoughtQuery = "UPDATE items SET date_last_bought = GETDATE() WHERE item_id = ?";
+            try (PreparedStatement dateLastBoughtStatement = getConnection().prepareStatement(dateLastBoughtQuery)) {
+                dateLastBoughtStatement.setInt(1, itemId);
+                dateLastBoughtStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error buying item: " + e.getMessage());
+        }
     }
 
-    public void setItemDateLastBought(int id, LocalDate dateLastBought) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void sellItem(int itemId, int quantity) {
+        try {
+            String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity - ? WHERE item_id = ?";
+            try (PreparedStatement quantityStatement = getConnection().prepareStatement(quantityQuery)) {
+                quantityStatement.setInt(1, quantity);
+                quantityStatement.setInt(2, itemId);
+                quantityStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error selling item: " + e.getMessage());
+        }
     }
 }

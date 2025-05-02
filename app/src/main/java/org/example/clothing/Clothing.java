@@ -40,18 +40,5 @@ public abstract class Clothing {
         this.imagePath = imagePath;
     }
 
-    public void buy(int quantity) {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    public boolean sell(int quantity) {
-        if (quantity > this.stockQuantity) {
-            return false;
-        }
-
-        throw new UnsupportedOperationException("Not implemented yet");
-        // return true;
-    }
-
     public abstract FormalityLevel getFormalityLevel();
 }
