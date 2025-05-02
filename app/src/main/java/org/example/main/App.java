@@ -358,7 +358,7 @@ public class App extends Application {
     // Displays the buy/sell items page.
     private void showBuySellItemsPage(Stage stage) throws Exception {
         stage.setTitle("Buy/Sell Items");
-        
+
         GridPane grid = new GridPane();
         styleGrid(grid);
 
@@ -379,9 +379,10 @@ public class App extends Application {
         ArrayList<Clothing> items = databaseConnection.getAllItems();
         for (int i = 0; i < items.size(); i++) {
             Clothing item = items.get(i);
-            
+
             int itemTopRow = i * 3 + 2; // 3 rows per item, offset by 2 for the header and back button
-            
+            final int itemIndex = i;
+
             // display the item image and details
             URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
             ImageView imageView = new ImageView(imagePath.toExternalForm());
@@ -405,9 +406,11 @@ public class App extends Application {
                     int buyQuantity = Integer.parseInt(buyQuantityInput.getText());
                     databaseConnection.buyItem(item.id, buyQuantity);
 
+                    // update the `items` list
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
                     // update the item details string
-                    Clothing updatedItem = databaseConnection.getItemById(item.id);
-                    String updatedItemDetails = getItemDetails(updatedItem);
+                    String updatedItemDetails = getItemDetails(items.get(itemIndex));
                     itemDetailsText.setText(updatedItemDetails);
 
                     // alert the user that the items have been bought
@@ -436,11 +439,20 @@ public class App extends Application {
             sellButton.setOnAction(e -> {
                 try {
                     int sellQuantity = Integer.parseInt(sellQuantityInput.getText());
+                    if (sellQuantity > items.get(itemIndex).stockQuantity) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Cannot sell more items than in stock.");
+                        alert.showAndWait();
+                        return;
+                    }
                     databaseConnection.sellItem(item.id, sellQuantity);
 
+                    // update the `items` list
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
                     // update the item details string
-                    Clothing updatedItem = databaseConnection.getItemById(item.id);
-                    String updatedItemDetails = getItemDetails(updatedItem);
+                    String updatedItemDetails = getItemDetails(items.get(itemIndex));
                     itemDetailsText.setText(updatedItemDetails);
 
                     // alert the user that the items have been sold
