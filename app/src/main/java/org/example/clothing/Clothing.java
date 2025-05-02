@@ -13,6 +13,7 @@ public abstract class Clothing {
     public String material;
     public LocalDate dateLastBought;
     public int stockQuantity;
+    public double price;
     public RestockSettings restockSettings;
     public String imagePath;
 
@@ -25,6 +26,7 @@ public abstract class Clothing {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath
     ) {
@@ -36,6 +38,7 @@ public abstract class Clothing {
         this.material = material;
         this.dateLastBought = dateLastBought;
         this.stockQuantity = stockQuantity;
+        this.price = price;
         this.restockSettings = restockSettings;
         this.imagePath = imagePath;
     }

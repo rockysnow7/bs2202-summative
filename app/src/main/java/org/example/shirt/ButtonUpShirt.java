@@ -19,6 +19,7 @@ public class ButtonUpShirt extends Shirt {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath,
         SleeveType sleeveType,
@@ -27,7 +28,7 @@ public class ButtonUpShirt extends Shirt {
         int numPockets,
         CuffStyle cuffStyle
     ) {
-        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath, sleeveType, neckType, pattern, numPockets);
+        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, price, restockSettings, imagePath, sleeveType, neckType, pattern, numPockets);
         this.cuffStyle = cuffStyle;
     }
 }

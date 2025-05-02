@@ -22,13 +22,14 @@ public abstract class Shoes extends Clothing {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath,
         SoleType soleType,
         ClosureType closureType,
         HeelHeight heelHeight
     ) {
-        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath);
+        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, price, restockSettings, imagePath);
 
         this.soleType = soleType;
         this.closureType = closureType;

@@ -17,6 +17,7 @@ public class TShirt extends Shirt {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath,
         SleeveType sleeveType,
@@ -25,7 +26,7 @@ public class TShirt extends Shirt {
         int numPockets,
         boolean hasGraphic
     ) {
-        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath, sleeveType, neckType, pattern, numPockets);
+        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, price, restockSettings, imagePath, sleeveType, neckType, pattern, numPockets);
         this.hasGraphic = hasGraphic;
     }
 }

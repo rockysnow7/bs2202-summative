@@ -306,13 +306,14 @@ public class App extends Application {
         if (item instanceof Shirt) {
             Shirt shirt = (Shirt) item;
             itemDetails = String.format(
-                "Shirt: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nSleeve Type: %s, Neck Type: %s\nPattern: %s, Num Pockets: %d",
+                "Shirt: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nPrice: £%.2f, Sleeve Type: %s, Neck Type: %s\nPattern: %s, Num Pockets: %d",
                 shirt.name,
                 shirt.brand,
                 shirt.size,
                 shirt.material,
                 shirt.dateLastBought.toString(),
                 shirt.stockQuantity,
+                shirt.price,
                 shirt.sleeveType.toString(),
                 shirt.neckType.toString(),
                 shirt.pattern,
@@ -329,13 +330,14 @@ public class App extends Application {
         } else if (item instanceof Shoes) {
             Shoes shoes = (Shoes) item;
             itemDetails = String.format(
-                "Shoes: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nHeel Height: %s, Closure Type: %s, Sole Type: %s",
+                "Shoes: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nPrice: £%.2f, Heel Height: %s, Closure Type: %s, Sole Type: %s",
                 shoes.name,
                 shoes.brand,
                 shoes.size,
                 shoes.material,
                 shoes.dateLastBought.toString(),
                 shoes.stockQuantity,
+                shoes.price,
                 shoes.heelHeight.toString(),
                 shoes.closureType.toString(),
                 shoes.soleType.toString()

@@ -20,6 +20,7 @@ public class DressShoes extends Shoes {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath,
         SoleType soleType,
@@ -27,7 +28,7 @@ public class DressShoes extends Shoes {
         HeelHeight heelHeight,
         ToeStyle toeStyle
     ) {
-        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath, soleType, closureType, heelHeight);
+        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, price, restockSettings, imagePath, soleType, closureType, heelHeight);
         this.toeStyle = toeStyle;
     }
 }

@@ -254,7 +254,7 @@ public class DatabaseConnection {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    private TShirt getTShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
+    private TShirt getTShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
         try {
             String query = "SELECT * FROM t_shirts WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -275,6 +275,7 @@ public class DatabaseConnection {
                         material,
                         dateLastBought,
                         stockQuantity,
+                        price,
                         restockSettings,
                         imagePath,
                         sleeveType,
@@ -291,7 +292,7 @@ public class DatabaseConnection {
         }
     }
 
-    private ButtonUpShirt getButtonUpShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
+    private ButtonUpShirt getButtonUpShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
         try {
             String query = "SELECT * FROM button_up_shirts WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -312,6 +313,7 @@ public class DatabaseConnection {
                         material,
                         dateLastBought,
                         stockQuantity,
+                        price,
                         restockSettings,
                         imagePath,
                         sleeveType,
@@ -328,7 +330,7 @@ public class DatabaseConnection {
         }
     }
 
-    private Shirt getShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath) {
+    private Shirt getShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath) {
         try {
             String query = "SELECT * FROM shirts WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -355,6 +357,7 @@ public class DatabaseConnection {
                                 material,
                                 dateLastBought,
                                 stockQuantity,
+                                price,
                                 restockSettings,
                                 imagePath,
                                 sleeveType,
@@ -372,6 +375,7 @@ public class DatabaseConnection {
                                 material,
                                 dateLastBought,
                                 stockQuantity,
+                                price,
                                 restockSettings,
                                 imagePath,
                                 sleeveType,
@@ -390,7 +394,7 @@ public class DatabaseConnection {
         }
     }
 
-    private DressShoes getDressShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
+    private DressShoes getDressShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
         try {
             String query = "SELECT * FROM dress_shoes WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -411,6 +415,7 @@ public class DatabaseConnection {
                         material,
                         dateLastBought,
                         stockQuantity,
+                        price,
                         restockSettings,
                         imagePath,
                         soleType,
@@ -426,7 +431,7 @@ public class DatabaseConnection {
         }
     }
 
-    private AthleticShoes getAthleticShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
+    private AthleticShoes getAthleticShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
         try {
             String query = "SELECT * FROM athletic_shoes WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -447,6 +452,7 @@ public class DatabaseConnection {
                         material,
                         dateLastBought,
                         stockQuantity,
+                        price,
                         restockSettings,
                         imagePath,
                         soleType,
@@ -462,7 +468,7 @@ public class DatabaseConnection {
         }
     }
 
-    private Shoes getShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, RestockSettings restockSettings, String imagePath) {
+    private Shoes getShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath) {
         try {
             String query = "SELECT * FROM shoes WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -488,6 +494,7 @@ public class DatabaseConnection {
                                 material,
                                 dateLastBought,
                                 stockQuantity,
+                                price,
                                 restockSettings,
                                 imagePath,
                                 soleType,
@@ -504,6 +511,7 @@ public class DatabaseConnection {
                                 material,
                                 dateLastBought,
                                 stockQuantity,
+                                price,
                                 restockSettings,
                                 imagePath,
                                 soleType,
@@ -537,6 +545,7 @@ public class DatabaseConnection {
                         String material = resultSet.getString("material");
                         LocalDate dateLastBought = resultSet.getDate("date_last_bought").toLocalDate();
                         int stockQuantity = resultSet.getInt("stock_quantity");
+                        double price = resultSet.getDouble("price");
                         String imagePath = resultSet.getString("image_path");
 
                         RestockSettings restockSettings = getRestockSettings(itemId);
@@ -552,6 +561,7 @@ public class DatabaseConnection {
                                     material,
                                     dateLastBought,
                                     stockQuantity,
+                                    price,
                                     restockSettings,
                                     imagePath
                                 );
@@ -569,6 +579,7 @@ public class DatabaseConnection {
                                     material,
                                     dateLastBought,
                                     stockQuantity,
+                                    price,
                                     restockSettings,
                                     imagePath
                                 );
@@ -605,6 +616,7 @@ public class DatabaseConnection {
                 String material = resultSet.getString("material");
                 LocalDate dateLastBought = resultSet.getDate("date_last_bought").toLocalDate();
                 int stockQuantity = resultSet.getInt("stock_quantity");
+                double price = resultSet.getDouble("price");
                 String imagePath = resultSet.getString("image_path");
 
                 RestockSettings restockSettings = getRestockSettings(itemId);
@@ -620,6 +632,7 @@ public class DatabaseConnection {
                             material,
                             dateLastBought,
                             stockQuantity,
+                            price,
                             restockSettings,
                             imagePath
                         );
@@ -634,6 +647,7 @@ public class DatabaseConnection {
                             material,
                             dateLastBought,
                             stockQuantity,
+                            price,
                             restockSettings,
                             imagePath
                         );

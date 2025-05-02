@@ -22,6 +22,7 @@ public abstract class Shirt extends Clothing {
         String material,
         LocalDate dateLastBought,
         int stockQuantity,
+        double price,
         RestockSettings restockSettings,
         String imagePath,
         SleeveType sleeveType,
@@ -29,7 +30,7 @@ public abstract class Shirt extends Clothing {
         String pattern,
         int numPockets
     ) {
-        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, restockSettings, imagePath);
+        super(id, name, brand, size, color, material, dateLastBought, stockQuantity, price, restockSettings, imagePath);
 
         this.sleeveType = sleeveType;
         this.neckType = neckType;
