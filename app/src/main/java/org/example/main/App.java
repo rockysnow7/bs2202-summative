@@ -302,7 +302,7 @@ public class App extends Application {
     }
 
     // Returns the details of a given item as a string. Used by `showBuySellItemsPage`.
-    private static String getItemDetailsForShowBuySellItemsPage(Clothing item) {
+    private static String getItemDetailsFull(Clothing item) {
         String itemDetails = "";
         if (item instanceof Shirt) {
             Shirt shirt = (Shirt) item;
@@ -391,7 +391,7 @@ public class App extends Application {
             imageView.setFitHeight(100);
             grid.add(imageView, 0, itemTopRow, 1, 1);
 
-            String itemDetails = getItemDetailsForShowBuySellItemsPage(item);
+            String itemDetails = getItemDetailsFull(item);
             Text itemDetailsText = new Text(itemDetails);
             grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
 
@@ -419,7 +419,7 @@ public class App extends Application {
                     items.set(itemIndex, databaseConnection.getItemById(item.id));
 
                     // update the item details string
-                    String updatedItemDetails = getItemDetailsForShowBuySellItemsPage(items.get(itemIndex));
+                    String updatedItemDetails = getItemDetailsFull(items.get(itemIndex));
                     itemDetailsText.setText(updatedItemDetails);
 
                     // alert the user that the items have been bought
@@ -483,7 +483,7 @@ public class App extends Application {
                     // update the `items` list and item details string
                     items.set(itemIndex, databaseConnection.getItemById(item.id));
 
-                    String updatedItemDetails = getItemDetailsForShowBuySellItemsPage(items.get(itemIndex));
+                    String updatedItemDetails = getItemDetailsFull(items.get(itemIndex));
                     itemDetailsText.setText(updatedItemDetails);
                 } catch (NumberFormatException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -628,6 +628,71 @@ public class App extends Application {
         stage.show();
     }
 
+    // Displays the view items page.
+    private void showViewItemsPage(Stage stage, String searchQuery) throws Exception {
+        stage.setTitle("View Items");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showManageItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("View Items");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        Label searchQueryLabel = new Label("Search Query:");
+        grid.add(searchQueryLabel, 0, 2);
+
+        TextField searchQueryInput = new TextField();
+        grid.add(searchQueryInput, 1, 2);
+
+        Button searchButton = new Button("Search");
+        searchButton.setOnAction(e -> {
+            try {
+                showViewItemsPage(stage, searchQueryInput.getText());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(searchButton, 2, 2);
+
+        ArrayList<Clothing> items = databaseConnection.getAllItems();
+        items = items.stream()
+            .filter(item -> item.name.toLowerCase().contains(searchQuery.toLowerCase()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        for (int i = 0; i < items.size(); i++) {
+            Clothing item = items.get(i);
+
+            int itemTopRow = i * 2 + 3; // 2 rows per item, offset by 3 for the header, back button, and search query
+            final int itemIndex = i;
+
+            // display the item image and details
+            URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
+            ImageView imageView = new ImageView(imagePath.toExternalForm());
+            imageView.setFitWidth(100);
+            imageView.setFitHeight(100);
+            grid.add(imageView, 0, itemTopRow, 1, 1);
+
+            String itemDetails = getItemDetailsFull(item);
+            Text itemDetailsText = new Text(itemDetails);
+            grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
+        }
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     // Displays the manage items page.
     private void showManageItemsPage(Stage stage) throws Exception {
         stage.setTitle("Manage Items");
@@ -668,6 +733,16 @@ public class App extends Application {
             }
         });
         grid.add(editRestockSettingsButton, 0, 3);
+
+        Button viewItemsButton = new Button("View Items");
+        viewItemsButton.setOnAction(e -> {
+            try {
+                showViewItemsPage(stage, "");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(viewItemsButton, 0, 4);
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
