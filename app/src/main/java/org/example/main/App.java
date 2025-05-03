@@ -16,6 +16,9 @@ import org.example.shoes.DressShoes;
 import org.example.shoes.Shoes;
 import org.example.user.User;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -628,6 +631,169 @@ public class App extends Application {
         stage.show();
     }
 
+    // Prints all given items to a file.
+    private void printAllItemsToFile(ArrayList<Clothing> items) {
+        try {
+            File file = new File("items.txt");
+            FileWriter fileWriter = new FileWriter(file);
+            for (int i = 0; i < items.size(); i++) {
+                Clothing item = items.get(i);
+                RestockSettings restockSettings = databaseConnection.getRestockSettings(item.id);
+
+                if (item instanceof TShirt) {
+                    TShirt tShirt = (TShirt) item;
+                    String itemDetails = String.format(
+                        "Item Type: T-Shirt\n" +
+                        "Item ID: %d\n" +
+                        "Name: %s\n" +
+                        "Brand: %s\n" +
+                        "Size: %s\n" +
+                        "Colour: %s\n" +
+                        "Material: %s\n" +
+                        "Date Last Bought: %s\n" +
+                        "Stock Quantity: %d\n" +
+                        "Price: £%.2f\n" +
+                        "Restock Automatically: %s\n" +
+                        "Minimum Stock Quantity: %d\n" +
+                        "Sleeve Type: %s\n" +
+                        "Neck Type: %s\n" +
+                        "Pattern: %s\n" +
+                        "Num Pockets: %d\n" +
+                        "Has Graphic: %s\n",
+                        item.id,
+                        item.name,
+                        item.brand,
+                        item.size,
+                        item.color,
+                        item.material,
+                        item.dateLastBought,
+                        item.stockQuantity,
+                        item.price,
+                        restockSettings.restockAutomatically,
+                        restockSettings.minimumStockQuantity,
+                        tShirt.sleeveType,
+                        tShirt.neckType,
+                        tShirt.pattern,
+                        tShirt.numPockets,
+                        tShirt.hasGraphic
+                    );
+                    fileWriter.write(itemDetails);
+                } else if (item instanceof ButtonUpShirt) {
+                    ButtonUpShirt buttonUpShirt = (ButtonUpShirt) item;
+                    String itemDetails = String.format(
+                        "Item Type: Button Up Shirt\n" +
+                        "Item ID: %d\n" +
+                        "Name: %s\n" +
+                        "Brand: %s\n" +
+                        "Size: %s\n" +
+                        "Colour: %s\n" +
+                        "Material: %s\n" +
+                        "Date Last Bought: %s\n" +
+                        "Stock Quantity: %d\n" +
+                        "Price: £%.2f\n" +
+                        "Restock Automatically: %s\n" +
+                        "Minimum Stock Quantity: %d\n" +
+                        "Sleeve Type: %s\n" +
+                        "Cuff Style: %s\n",
+                        item.id,
+                        item.name,
+                        item.brand,
+                        item.size,
+                        item.color,
+                        item.material,
+                        item.dateLastBought,
+                        item.stockQuantity,
+                        item.price,
+                        restockSettings.restockAutomatically,
+                        restockSettings.minimumStockQuantity,
+                        buttonUpShirt.sleeveType,
+                        buttonUpShirt.cuffStyle
+                    );
+                    fileWriter.write(itemDetails);
+                } else if (item instanceof AthleticShoes) {
+                    AthleticShoes athleticShoes = (AthleticShoes) item;
+                    String itemDetails = String.format(
+                        "Item Type: Athletic Shoes\n" +
+                        "Item ID: %d\n" +
+                        "Name: %s\n" +
+                        "Brand: %s\n" +
+                        "Size: %s\n" +
+                        "Colour: %s\n" +
+                        "Material: %s\n" +
+                        "Date Last Bought: %s\n" +
+                        "Stock Quantity: %d\n" +
+                        "Price: £%.2f\n" +
+                        "Restock Automatically: %s\n" +
+                        "Minimum Stock Quantity: %d\n" +
+                        "Sole Type: %s\n" +
+                        "Closure Type: %s\n" +
+                        "Heel Height: %s\n" +
+                        "Sport: %s\n",
+                        item.id,
+                        item.name,
+                        item.brand,
+                        item.size,
+                        item.color,
+                        item.material,
+                        item.dateLastBought,
+                        item.stockQuantity,
+                        item.price,
+                        restockSettings.restockAutomatically,
+                        restockSettings.minimumStockQuantity,
+                        athleticShoes.soleType,
+                        athleticShoes.closureType,
+                        athleticShoes.heelHeight,
+                        athleticShoes.sport
+                    );
+                    fileWriter.write(itemDetails);
+                } else if (item instanceof DressShoes) {
+                    DressShoes dressShoes = (DressShoes) item;
+                    String itemDetails = String.format(
+                        "Item Type: Dress Shoes\n" +
+                        "Item ID: %d\n" +
+                        "Name: %s\n" +
+                        "Brand: %s\n" +
+                        "Size: %s\n" +
+                        "Colour: %s\n" +
+                        "Material: %s\n" +
+                        "Date Last Bought: %s\n" +
+                        "Stock Quantity: %d\n" +
+                        "Price: £%.2f\n" +
+                        "Restock Automatically: %s\n" +
+                        "Minimum Stock Quantity: %d\n" +
+                        "Sole Type: %s\n" +
+                        "Closure Type: %s\n" +
+                        "Heel Height: %s\n" +
+                        "Toe Style: %s\n",
+                        item.id,
+                        item.name,
+                        item.brand,
+                        item.size,
+                        item.color,
+                        item.material,
+                        item.dateLastBought,
+                        item.stockQuantity,
+                        item.price,
+                        restockSettings.restockAutomatically,
+                        restockSettings.minimumStockQuantity,
+                        dressShoes.soleType,
+                        dressShoes.closureType,
+                        dressShoes.heelHeight,
+                        dressShoes.toeStyle
+                    );
+                    fileWriter.write(itemDetails);
+                }
+
+                if (i < items.size() - 1) {
+                    fileWriter.write("\n==========\n\n");
+                }
+            }
+            fileWriter.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     // Displays the view items page.
     private void showViewItemsPage(Stage stage, String searchQuery) throws Exception {
         stage.setTitle("View Items");
@@ -665,15 +831,22 @@ public class App extends Application {
         });
         grid.add(searchButton, 2, 2);
 
-        ArrayList<Clothing> items = databaseConnection.getAllItems();
-        items = items.stream()
+        final ArrayList<Clothing> items = databaseConnection.getAllItems();
+        final ArrayList<Clothing> filteredItems = items.stream()
             .filter(item -> item.name.toLowerCase().contains(searchQuery.toLowerCase()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        for (int i = 0; i < items.size(); i++) {
-            Clothing item = items.get(i);
+        // display the print all button
+        Button printAllButton = new Button("Print All Items To File");
+        printAllButton.setOnAction(e -> {
+            printAllItemsToFile(filteredItems);
+        });
+        grid.add(printAllButton, 0, 3, 1, 1);
 
-            int itemTopRow = i * 2 + 3; // 2 rows per item, offset by 3 for the header, back button, and search query
+        for (int i = 0; i < filteredItems.size(); i++) {
+            Clothing item = filteredItems.get(i);
+
+            int itemTopRow = i * 2 + 4; // 2 rows per item, offset by 4 for the header, back button, search bar, and print all button
             final int itemIndex = i;
 
             // display the item image and details
