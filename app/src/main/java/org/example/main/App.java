@@ -405,6 +405,14 @@ public class App extends Application {
             buyButton.setOnAction(e -> {
                 try {
                     int buyQuantity = Integer.parseInt(buyQuantityInput.getText());
+                    if (buyQuantity < 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Quantity cannot be negative.");
+                        alert.showAndWait();
+                        return;
+                    }
+
                     databaseConnection.buyItem(item.id, buyQuantity);
 
                     // update the `items` list
@@ -440,6 +448,14 @@ public class App extends Application {
             sellButton.setOnAction(e -> {
                 try {
                     int sellQuantity = Integer.parseInt(sellQuantityInput.getText());
+                    if (sellQuantity < 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Quantity cannot be negative.");
+                        alert.showAndWait();
+                        return;
+                    }
+
                     if (sellQuantity > items.get(itemIndex).stockQuantity) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error");
@@ -547,6 +563,13 @@ public class App extends Application {
             setButton.setOnAction(e -> {
                 try {
                     int newMinimumStockQuantity = Integer.parseInt(newMinimumStockQuantityInput.getText());
+                    if (newMinimumStockQuantity < 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Minimum stock quantity cannot be negative.");
+                        alert.showAndWait();
+                        return;
+                    }
                     databaseConnection.setRestockSettings(new RestockSettings(item.id, true, newMinimumStockQuantity));
 
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
