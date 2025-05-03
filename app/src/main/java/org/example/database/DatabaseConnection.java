@@ -829,7 +829,7 @@ public class DatabaseConnection {
                 quantityStatement.executeUpdate();
             }
 
-            String dateLastBoughtQuery = "UPDATE items SET date_last_bought = GETDATE() WHERE item_id = ?";
+            String dateLastBoughtQuery = "UPDATE items SET date_last_bought = CURRENT_DATE() WHERE item_id = ?";
             try (PreparedStatement dateLastBoughtStatement = getConnection().prepareStatement(dateLastBoughtQuery)) {
                 dateLastBoughtStatement.setInt(1, itemId);
                 dateLastBoughtStatement.executeUpdate();
