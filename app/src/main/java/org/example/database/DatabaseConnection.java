@@ -805,6 +805,20 @@ public class DatabaseConnection {
         }
     }
 
+    // Sets the price of the item with the given item ID in the `items` table to the given price.
+    public void updateItemPrice(int itemId, double price) {
+        try {
+            String query = "UPDATE items SET price = ? WHERE item_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setDouble(1, price);
+                statement.setInt(2, itemId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error updating item price: " + e.getMessage());
+        }
+    }
+
     // Increases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
     public void buyItem(int itemId, int quantity) {
         try {

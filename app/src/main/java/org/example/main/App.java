@@ -887,6 +887,106 @@ public class App extends Application {
         stage.show();
     }
 
+    private String getItemDetailsForEditPricesPage(Clothing item) {
+        return String.format(
+            "Item ID: %d\n" +
+            "Name: %s\n" +
+            "Cost: £%.2f\n" +
+            "Price: £%.2f\n",
+            item.id,
+            item.name,
+            item.cost,
+            item.price
+        );
+    }
+
+    // Displays the edit prices page.
+    private void showEditPricesPage(Stage stage) throws Exception {
+        stage.setTitle("Edit Prices");
+
+        GridPane grid = new GridPane();
+        styleGrid(grid);
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(e -> {
+            try {
+                showManageItemsPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(backButton, 0, 0);
+
+        Text sceneTitle = new Text("Edit Prices");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 1, 2, 1);
+
+        ArrayList<Clothing> items = databaseConnection.getAllItems();
+
+        for (int i = 0; i < items.size(); i++) {
+            Clothing item = items.get(i);
+
+            int itemTopRow = i * 2 + 4; // 2 rows per item, offset by 4 for the header, back button, and scene title
+            final int itemIndex = i;
+
+            // display the item image and details
+            URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
+            ImageView imageView = new ImageView(imagePath.toExternalForm());
+            imageView.setFitWidth(100);
+            imageView.setFitHeight(100);
+            grid.add(imageView, 0, itemTopRow, 1, 1);
+
+            String itemDetails = getItemDetailsForEditPricesPage(item);
+            Text itemDetailsText = new Text(itemDetails);
+            grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
+
+            Label newPriceLabel = new Label("New Price: £");
+            grid.add(newPriceLabel, 0, itemTopRow + 1, 1, 1);
+            TextField newPriceInput = new TextField();
+            grid.add(newPriceInput, 1, itemTopRow + 1, 1, 1);
+            
+            Button setPriceButton = new Button("Set Price");
+            setPriceButton.setOnAction(e -> {
+                try {
+                    double newPrice = Double.parseDouble(newPriceInput.getText());
+                    if (newPrice < 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Invalid price: price must be greater than 0.");
+                        alert.showAndWait();
+                        return;
+                    }
+
+                    databaseConnection.updateItemPrice(item.id, newPrice);
+
+                    // update the `items` list
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
+                    // update the item details text
+                    String newItemDetails = getItemDetailsForEditPricesPage(items.get(itemIndex));
+                    itemDetailsText.setText(newItemDetails);
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setHeaderText("Price updated successfully.");
+                    alert.showAndWait();
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Invalid price: price must be a number.");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(setPriceButton, 2, itemTopRow + 1, 1, 1);
+        }
+
+        Scene scene = new Scene(grid, 300, 275);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     // Displays the manage items page.
     private void showManageItemsPage(Stage stage) throws Exception {
         stage.setTitle("Manage Items");
@@ -937,6 +1037,16 @@ public class App extends Application {
             }
         });
         grid.add(viewItemsButton, 0, 4);
+
+        Button editPricesButton = new Button("Edit Prices");
+        editPricesButton.setOnAction(e -> {
+            try {
+                showEditPricesPage(stage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        grid.add(editPricesButton, 0, 5);
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
