@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -310,13 +311,14 @@ public class App extends Application {
         if (item instanceof Shirt) {
             Shirt shirt = (Shirt) item;
             itemDetails = String.format(
-                "Shirt: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nPrice: £%.2f, Sleeve Type: %s, Neck Type: %s\nPattern: %s, Num Pockets: %d",
+                "Shirt: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nCost: £%.2f, Price: £%.2f\nSleeve Type: %s, Neck Type: %s\nPattern: %s, Num Pockets: %d",
                 shirt.name,
                 shirt.brand,
                 shirt.size,
                 shirt.material,
                 shirt.dateLastBought.toString(),
                 shirt.stockQuantity,
+                shirt.cost,
                 shirt.price,
                 shirt.sleeveType.toString(),
                 shirt.neckType.toString(),
@@ -334,13 +336,14 @@ public class App extends Application {
         } else if (item instanceof Shoes) {
             Shoes shoes = (Shoes) item;
             itemDetails = String.format(
-                "Shoes: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nPrice: £%.2f, Heel Height: %s, Closure Type: %s, Sole Type: %s",
+                "Shoes: '%s' by '%s'\nSize: %d, Material: %s\nDate Last Bought: %s, Stock Quantity: %d\nCost: £%.2f, Price: £%.2f\nHeel Height: %s, Closure Type: %s, Sole Type: %s",
                 shoes.name,
                 shoes.brand,
                 shoes.size,
                 shoes.material,
                 shoes.dateLastBought.toString(),
                 shoes.stockQuantity,
+                shoes.cost,
                 shoes.price,
                 shoes.heelHeight.toString(),
                 shoes.closureType.toString(),
@@ -632,7 +635,7 @@ public class App extends Application {
     }
 
     // Prints all given items to a file.
-    private void printAllItemsToFile(ArrayList<Clothing> items) {
+    private void printItemsToFile(ArrayList<Clothing> items) {
         try {
             File file = new File("items.txt");
             FileWriter fileWriter = new FileWriter(file);
@@ -652,6 +655,7 @@ public class App extends Application {
                         "Material: %s\n" +
                         "Date Last Bought: %s\n" +
                         "Stock Quantity: %d\n" +
+                        "Cost: £%.2f\n" +
                         "Price: £%.2f\n" +
                         "Restock Automatically: %s\n" +
                         "Minimum Stock Quantity: %d\n" +
@@ -668,6 +672,7 @@ public class App extends Application {
                         item.material,
                         item.dateLastBought,
                         item.stockQuantity,
+                        item.cost,
                         item.price,
                         restockSettings.restockAutomatically,
                         restockSettings.minimumStockQuantity,
@@ -690,6 +695,7 @@ public class App extends Application {
                         "Material: %s\n" +
                         "Date Last Bought: %s\n" +
                         "Stock Quantity: %d\n" +
+                        "Cost: £%.2f\n" +
                         "Price: £%.2f\n" +
                         "Restock Automatically: %s\n" +
                         "Minimum Stock Quantity: %d\n" +
@@ -703,6 +709,7 @@ public class App extends Application {
                         item.material,
                         item.dateLastBought,
                         item.stockQuantity,
+                        item.cost,
                         item.price,
                         restockSettings.restockAutomatically,
                         restockSettings.minimumStockQuantity,
@@ -722,6 +729,7 @@ public class App extends Application {
                         "Material: %s\n" +
                         "Date Last Bought: %s\n" +
                         "Stock Quantity: %d\n" +
+                        "Cost: £%.2f\n" +
                         "Price: £%.2f\n" +
                         "Restock Automatically: %s\n" +
                         "Minimum Stock Quantity: %d\n" +
@@ -737,6 +745,7 @@ public class App extends Application {
                         item.material,
                         item.dateLastBought,
                         item.stockQuantity,
+                        item.cost,
                         item.price,
                         restockSettings.restockAutomatically,
                         restockSettings.minimumStockQuantity,
@@ -758,6 +767,7 @@ public class App extends Application {
                         "Material: %s\n" +
                         "Date Last Bought: %s\n" +
                         "Stock Quantity: %d\n" +
+                        "Cost: £%.2f\n" +
                         "Price: £%.2f\n" +
                         "Restock Automatically: %s\n" +
                         "Minimum Stock Quantity: %d\n" +
@@ -773,6 +783,7 @@ public class App extends Application {
                         item.material,
                         item.dateLastBought,
                         item.stockQuantity,
+                        item.cost,
                         item.price,
                         restockSettings.restockAutomatically,
                         restockSettings.minimumStockQuantity,
@@ -839,7 +850,7 @@ public class App extends Application {
         // display the print all button
         Button printAllButton = new Button("Print All Items To File");
         printAllButton.setOnAction(e -> {
-            printAllItemsToFile(filteredItems);
+            printItemsToFile(filteredItems);
         });
         grid.add(printAllButton, 0, 3, 1, 1);
 
@@ -847,7 +858,6 @@ public class App extends Application {
             Clothing item = filteredItems.get(i);
 
             int itemTopRow = i * 2 + 4; // 2 rows per item, offset by 4 for the header, back button, search bar, and print all button
-            final int itemIndex = i;
 
             // display the item image and details
             URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
@@ -859,6 +869,17 @@ public class App extends Application {
             String itemDetails = getItemDetailsFull(item);
             Text itemDetailsText = new Text(itemDetails);
             grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
+
+            Button printItemButton = new Button("Print Item To File");
+            printItemButton.setOnAction(e -> {
+                printItemsToFile(new ArrayList<>(Collections.singletonList(item)));
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText("Item printed to file.");
+                alert.showAndWait();
+            });
+            grid.add(printItemButton, 0, itemTopRow + 1, 1, 1);
         }
 
         Scene scene = new Scene(grid, 300, 275);

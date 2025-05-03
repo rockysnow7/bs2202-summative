@@ -26,8 +26,8 @@ VALUES
 /* populate items table */
 INSERT INTO items
 VALUES
-    (1, 'SHIRT', 'Red T-Shirt', 'Superdry', 10, 'Red', 'Cotton', '2025-04-01', 3, 10.00, 't-shirt1.png'),
-    (2, 'SHOES', 'Brown Dress Shoes', 'Gucci', 5, 'Brown', 'Leather', '2025-04-20', 1, 100.00, 'dress-shoes1.png');
+    (1, 'SHIRT', 'Red T-Shirt', 'Superdry', 10, 'Red', 'Cotton', '2025-04-01', 3, 8.00, 10.00, 't-shirt1.png'),
+    (2, 'SHOES', 'Brown Dress Shoes', 'Gucci', 5, 'Brown', 'Leather', '2025-04-20', 1, 80.00, 100.00, 'dress-shoes1.png');
 
 /* populate restock_settings table */
 INSERT INTO restock_settings

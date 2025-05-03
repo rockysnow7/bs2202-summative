@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS items (
     material VARCHAR(40) NOT NULL,
     date_last_bought DATE NOT NULL,
     stock_quantity INT NOT NULL,
+    cost DECIMAL(10, 2) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     image_path VARCHAR(255) NOT NULL
 );
