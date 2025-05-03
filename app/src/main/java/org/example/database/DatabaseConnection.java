@@ -53,18 +53,6 @@ public class DatabaseConnection {
         System.out.println("Database connection established successfully");
     }
 
-    // Disconnects from the database.
-    private void disconnect() {
-        if (connection != null) {
-            try {
-                connection.close();
-                System.out.println("Database connection closed");
-            } catch (SQLException e) {
-                System.err.println("Error closing database connection: " + e.getMessage());
-            }
-        }
-    }
-
     // Returns a connection to the database. If the connection is not already established, it will establish a new connection.
     private Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
@@ -235,7 +223,8 @@ public class DatabaseConnection {
         deleteAccountCreationRequest(requestId);
     }
 
-    private RestockSettings getRestockSettings(int itemId) {
+    // Returns the restock settings for the given item ID in the `restock_settings` table.
+    public RestockSettings getRestockSettings(int itemId) {
         try {
             String query = "SELECT * FROM restock_settings WHERE item_id = ?";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -250,10 +239,51 @@ public class DatabaseConnection {
         }
     }
 
-    public void setRestockSettings(int itemId, RestockSettings restockSettings) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    /**
+     * Sets the given restock settings in the `restock_settings` table.
+     * @param restockSettings the restock settings to set
+     */
+    public void setRestockSettings(RestockSettings restockSettings) {
+        try {
+            String query = "UPDATE restock_settings SET restock_automatically = ?, minimum_stock_quantity = ? WHERE item_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setBoolean(1, restockSettings.restockAutomatically);
+                statement.setInt(2, restockSettings.minimumStockQuantity);
+                statement.setInt(3, restockSettings.itemId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error setting restock settings: " + e.getMessage());
+        }
     }
 
+    /**
+     * Sets the stock quantity of the item with the given item ID in the `items` table to the minimum stock quantity if the stock quantity is less than the minimum stock quantity.
+     * @param itemId the ID of the item to restock
+     * @return the new stock quantity if the item was restocked, -1 otherwise
+     */
+    public int restockItem(int itemId) {
+        RestockSettings restockSettings = getRestockSettings(itemId);
+        if (restockSettings == null) {
+            return -1;
+        }
+        if (!restockSettings.restockAutomatically) {
+            return -1;
+        }
+
+        Clothing item = getItemById(itemId);
+        if (item == null) {
+            return -1;
+        }
+        if (item.stockQuantity >= restockSettings.minimumStockQuantity) {
+            return -1;
+        }
+
+        buyItem(itemId, restockSettings.minimumStockQuantity - item.stockQuantity);
+        return restockSettings.minimumStockQuantity;
+    }
+
+    // Returns the `TShirt` object for the given item ID in the `t_shirts` table.
     private TShirt getTShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
         try {
             String query = "SELECT * FROM t_shirts WHERE item_id = ?";
@@ -292,6 +322,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `ButtonUpShirt` object for the given item ID in the `button_up_shirts` table.
     private ButtonUpShirt getButtonUpShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SleeveType sleeveType, NeckType neckType, String pattern, int numPockets) {
         try {
             String query = "SELECT * FROM button_up_shirts WHERE item_id = ?";
@@ -330,6 +361,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `Shirt` object for the given item ID in the `shirts` table.
     private Shirt getShirt(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath) {
         try {
             String query = "SELECT * FROM shirts WHERE item_id = ?";
@@ -394,6 +426,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `DressShoes` object for the given item ID in the `dress_shoes` table.
     private DressShoes getDressShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
         try {
             String query = "SELECT * FROM dress_shoes WHERE item_id = ?";
@@ -431,6 +464,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `AthleticShoes` object for the given item ID in the `athletic_shoes` table.
     private AthleticShoes getAthleticShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath, SoleType soleType, ClosureType closureType, HeelHeight heelHeight) {
         try {
             String query = "SELECT * FROM athletic_shoes WHERE item_id = ?";
@@ -468,6 +502,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `Shoes` object for the given item ID in the `shoes` table.
     private Shoes getShoes(int itemId, String name, String brand, int size, String colour, String material, LocalDate dateLastBought, int stockQuantity, double price, RestockSettings restockSettings, String imagePath) {
         try {
             String query = "SELECT * FROM shoes WHERE item_id = ?";
@@ -529,6 +564,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns a list of all items in the `items` table.
     public ArrayList<Clothing> getAllItems() {
         try {
             String query = "SELECT * FROM items";
@@ -598,6 +634,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Returns the `Clothing` object for the given item ID in the `items` table.
     public Clothing getItemById(int id) {
         String query = "SELECT * FROM items WHERE item_id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -662,6 +699,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Increases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
     public void buyItem(int itemId, int quantity) {
         try {
             String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
@@ -681,6 +719,7 @@ public class DatabaseConnection {
         }
     }
 
+    // Decreases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
     public void sellItem(int itemId, int quantity) {
         try {
             String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity - ? WHERE item_id = ?";

@@ -7,6 +7,7 @@ import org.example.clothing.Clothing;
 import org.example.database.DatabaseConnection;
 import org.example.enums.UserType;
 import org.example.requests.AccountCreationRequest;
+import org.example.settings.RestockSettings;
 import org.example.shirt.ButtonUpShirt;
 import org.example.shirt.Shirt;
 import org.example.shirt.TShirt;
@@ -301,7 +302,7 @@ public class App extends Application {
     }
 
     // Returns the details of a given item as a string. Used by `showBuySellItemsPage`.
-    private static String getItemDetails(Clothing item) {
+    private static String getItemDetailsForShowBuySellItemsPage(Clothing item) {
         String itemDetails = "";
         if (item instanceof Shirt) {
             Shirt shirt = (Shirt) item;
@@ -390,7 +391,7 @@ public class App extends Application {
             imageView.setFitHeight(100);
             grid.add(imageView, 0, itemTopRow, 1, 1);
 
-            String itemDetails = getItemDetails(item);
+            String itemDetails = getItemDetailsForShowBuySellItemsPage(item);
             Text itemDetailsText = new Text(itemDetails);
             grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
 
@@ -410,7 +411,7 @@ public class App extends Application {
                     items.set(itemIndex, databaseConnection.getItemById(item.id));
 
                     // update the item details string
-                    String updatedItemDetails = getItemDetails(items.get(itemIndex));
+                    String updatedItemDetails = getItemDetailsForShowBuySellItemsPage(items.get(itemIndex));
                     itemDetailsText.setText(updatedItemDetails);
 
                     // alert the user that the items have been bought
@@ -446,20 +447,28 @@ public class App extends Application {
                         alert.showAndWait();
                         return;
                     }
+
                     databaseConnection.sellItem(item.id, sellQuantity);
-
-                    // update the `items` list
-                    items.set(itemIndex, databaseConnection.getItemById(item.id));
-
-                    // update the item details string
-                    String updatedItemDetails = getItemDetails(items.get(itemIndex));
-                    itemDetailsText.setText(updatedItemDetails);
 
                     // alert the user that the items have been sold
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Success");
                     alert.setHeaderText("Items sold successfully.");
                     alert.showAndWait();
+
+                    // restock the item if needed
+                    if (databaseConnection.restockItem(item.id) != -1) {
+                        alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Restocked");
+                        alert.setHeaderText(String.format("Item automatically restocked to %d items.", databaseConnection.getItemById(item.id).stockQuantity));
+                        alert.showAndWait();
+                    }
+
+                    // update the `items` list and item details string
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
+                    String updatedItemDetails = getItemDetailsForShowBuySellItemsPage(items.get(itemIndex));
+                    itemDetailsText.setText(updatedItemDetails);
                 } catch (NumberFormatException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
@@ -477,10 +486,21 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the set minimum stock page.
-    private void showSetMinimumStockPage(Stage stage) throws Exception {
-        stage.setTitle("Set Minimum Stock");
-        
+    // Returns the details of a given item as a string. Used by `showEditRestockSettingsPage`.
+    private static String getItemDetailsForShowEditRestockSettingsPage(Clothing item, RestockSettings restockSettings) {
+        return String.format(
+            "Name: %s\nBrand: %s\nCurrent Stock Quantity: %d\nMinimum Stock Quantity: %s",
+            item.name,
+            item.brand,
+            item.stockQuantity,
+            restockSettings.restockAutomatically ? restockSettings.minimumStockQuantity : "Not set"
+        );
+    }
+
+    // Displays the edit restock settings page.
+    private void showEditRestockSettingsPage(Stage stage) throws Exception {
+        stage.setTitle("Edit Restock Settings");
+
         GridPane grid = new GridPane();
         styleGrid(grid);
 
@@ -494,9 +514,91 @@ public class App extends Application {
         });
         grid.add(backButton, 0, 0);
 
-        Text sceneTitle = new Text("Set Minimum Stock");
+        Text sceneTitle = new Text("Edit Restock Settings");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 1, 2, 1);
+
+        ArrayList<Clothing> items = databaseConnection.getAllItems();
+        for (int i = 0; i < items.size(); i++) {
+            Clothing item = items.get(i);
+            RestockSettings restockSettings = databaseConnection.getRestockSettings(item.id);
+
+            int itemTopRow = i * 3 + 2; // 3 rows per item, offset by 2 for the header and back button
+            final int itemIndex = i;
+
+            // display the item image and details
+            URL imagePath = getClass().getResource(String.format("/images/%s", item.imagePath));
+            ImageView imageView = new ImageView(imagePath.toExternalForm());
+            imageView.setFitWidth(100);
+            imageView.setFitHeight(100);
+            grid.add(imageView, 0, itemTopRow, 1, 1);
+
+            String itemDetails = getItemDetailsForShowEditRestockSettingsPage(item, restockSettings);
+            Text itemDetailsText = new Text(itemDetails);
+            grid.add(itemDetailsText, 1, itemTopRow, 1, 1);
+
+            // display the restock settings
+            Label newMinimumStockQuantityLabel = new Label("New Minimum Stock Quantity:");
+            grid.add(newMinimumStockQuantityLabel, 0, itemTopRow + 1, 1, 1);
+            TextField newMinimumStockQuantityInput = new TextField();
+            grid.add(newMinimumStockQuantityInput, 1, itemTopRow + 1, 1, 1);
+
+            Button setButton = new Button("Set");
+            setButton.setOnAction(e -> {
+                try {
+                    int newMinimumStockQuantity = Integer.parseInt(newMinimumStockQuantityInput.getText());
+                    databaseConnection.setRestockSettings(new RestockSettings(item.id, true, newMinimumStockQuantity));
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setHeaderText("Restock settings saved.");
+                    alert.showAndWait();
+
+                    // restock the item if needed
+                    if (databaseConnection.restockItem(item.id) != -1) {
+                        alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Restocked");
+                        alert.setHeaderText(String.format("Item automatically restocked to %d items.", databaseConnection.getItemById(item.id).stockQuantity));
+                        alert.showAndWait();
+                    }
+
+                    // update the `items` list and item details string
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
+                    RestockSettings newRestockSettings = databaseConnection.getRestockSettings(item.id);
+                    String updatedItemDetails = getItemDetailsForShowEditRestockSettingsPage(items.get(itemIndex), newRestockSettings);
+                    itemDetailsText.setText(updatedItemDetails);
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Invalid quantity: quantity must be a number.");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            grid.add(setButton, 2, itemTopRow + 1, 1, 1);
+
+            if (restockSettings.restockAutomatically) {
+                Button unsetButton = new Button("Unset");
+                unsetButton.setOnAction(e -> {
+                    databaseConnection.setRestockSettings(new RestockSettings(item.id, false, 0));
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setHeaderText("Restock settings unset.");
+                    alert.showAndWait();
+
+                    // update the `items` list and item details string
+                    items.set(itemIndex, databaseConnection.getItemById(item.id));
+
+                    RestockSettings newRestockSettings = databaseConnection.getRestockSettings(item.id);
+                    String updatedItemDetails = getItemDetailsForShowEditRestockSettingsPage(items.get(itemIndex), newRestockSettings);
+                    itemDetailsText.setText(updatedItemDetails);
+                });
+                grid.add(unsetButton, 3, itemTopRow + 1, 1, 1);
+            }
+        }
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
@@ -534,15 +636,15 @@ public class App extends Application {
         });
         grid.add(buySellButton, 0, 2);
 
-        Button setMinimumStockButton = new Button("Set Minimum Stock");
-        setMinimumStockButton.setOnAction(e -> {
+        Button editRestockSettingsButton = new Button("Edit Restock Settings");
+        editRestockSettingsButton.setOnAction(e -> {
             try {
-                showSetMinimumStockPage(stage);
+                showEditRestockSettingsPage(stage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
-        grid.add(setMinimumStockButton, 1, 2);
+        grid.add(editRestockSettingsButton, 0, 3);
 
         Scene scene = new Scene(grid, 300, 275);
         stage.setScene(scene);
