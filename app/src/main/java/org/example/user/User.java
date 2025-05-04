@@ -2,6 +2,9 @@ package org.example.user;
 
 import org.example.enums.UserType;
 
+/**
+ * Represents a user.
+ */
 public class User {
     public int userId;
     public String username;

@@ -5,6 +5,10 @@ import org.example.settings.RestockSettings;
 import org.example.enums.SleeveType;
 import org.example.enums.NeckType;
 
+/**
+ * Represents a t-shirt.
+ * @extends Shirt
+ */
 public class TShirt extends Shirt {
     public boolean hasGraphic;
 

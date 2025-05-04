@@ -6,6 +6,10 @@ import org.example.enums.SoleType;
 import org.example.enums.ClosureType;
 import org.example.enums.HeelHeight;
 
+/**
+ * Represents a pair of athletic shoes.
+ * @extends Shoes
+ */
 public class AthleticShoes extends Shoes {
     public String sport;
 

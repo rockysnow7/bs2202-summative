@@ -8,6 +8,10 @@ import org.example.settings.RestockSettings;
 
 import java.time.LocalDate;
 
+/**
+ * Represents a pair of dress shoes.
+ * @extends Shoes
+ */
 public class DressShoes extends Shoes {
     public ToeStyle toeStyle;
 

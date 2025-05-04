@@ -5,9 +5,12 @@ import org.example.settings.RestockSettings;
 import org.example.enums.SoleType;
 import org.example.enums.ClosureType;
 import org.example.enums.HeelHeight;
-import org.example.enums.FormalityLevel;
 import org.example.clothing.Clothing;
 
+/**
+ * Represents a generic pair of shoes.
+ * @extends Clothing
+ */
 public abstract class Shoes extends Clothing {
     public SoleType soleType;
     public ClosureType closureType;
@@ -35,13 +38,5 @@ public abstract class Shoes extends Clothing {
         this.soleType = soleType;
         this.closureType = closureType;
         this.heelHeight = heelHeight;
-    }
-
-    @Override
-    public FormalityLevel getFormalityLevel() {
-        if (this.closureType == ClosureType.LACES) {
-            return FormalityLevel.FORMAL;
-        }
-        return FormalityLevel.CASUAL;
     }
 }

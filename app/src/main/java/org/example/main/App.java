@@ -51,14 +51,20 @@ import javafx.stage.Stage;
 
 public class App extends Application {
     DatabaseConnection databaseConnection = new DatabaseConnection();
-    // The ID of the currently logged in user. If no user is logged in, it is -1.
+    /**
+     * The ID of the currently logged in user. If no user is logged in, it is -1.
+     */
     int userId = -1;
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    // Returns the SHA-256 hash of a given password.
+    /**
+     * Hashes a given password using SHA-256.
+     * @param password the password to hash
+     * @return the SHA-256 hash of the password as a hexadecimal string
+     */
     private static String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -71,12 +77,20 @@ public class App extends Application {
         }
     }
 
-    // Returns true if the username is valid, false otherwise.
+    /**
+     * Checks if a given username is of a valid length.
+     * @param username the username to check
+     * @return true if the username is valid, false otherwise
+     */
     private static boolean isUsernameValid(String username) {
         return username.length() > 0 && username.length() <= 40;
     }
 
-    // Returns true if the username is already taken, false otherwise.
+    /**
+     * Checks if a given username is already taken.
+     * @param username the username to check
+     * @return true if the username is already taken, false otherwise
+     */
     private boolean isUsernameTaken(String username) {
         ArrayList<User> users = databaseConnection.getAllUsers();
         ArrayList<String> userUsernames = users
@@ -92,12 +106,19 @@ public class App extends Application {
         return userUsernames.contains(username) || accountCreationRequestsUsernames.contains(username);
     }
 
-    // Returns true if the password is valid, false otherwise.
+    /**
+     * Checks if a given password is of a valid length.
+     * @param password the password to check
+     * @return true if the password is valid, false otherwise
+     */
     private static boolean isPasswordValid(String password) {
         return password.length() > 0;
     }
 
-    // Styles a given `GridPane` (to maintain consistency).
+    /**
+     * Styles a given `GridPane` to maintain consistency.
+     * @param grid the `GridPane` to style
+     */
     private void styleGrid(GridPane grid) {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -105,7 +126,11 @@ public class App extends Application {
         grid.setPadding(new Insets(10, 25, 25, 10));
     }
 
-    // Displays the view account creation requests page.
+    /**
+     * Displays the "Manage Account Creation Requests" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showViewAccountCreationRequestsPage(Stage stage) throws Exception {
         stage.setTitle("Manage Account Creation Requests");
 
@@ -200,7 +225,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the edit privileges page.
+    /**
+     * Displays the "Edit Privileges" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showEditPrivilegesPage(Stage stage) throws Exception {
         stage.setTitle("Edit Privileges");
 
@@ -305,7 +334,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Returns the details of a given item as a string. Used by `showBuySellItemsPage`.
+    /**
+     * Returns the full display details of a given item as a string.
+     * @param item the item to get the details of
+     * @return the details of the item as a string
+     */
     private static String getItemDetailsFull(Clothing item) {
         String itemDetails = "";
         if (item instanceof Shirt) {
@@ -362,7 +395,11 @@ public class App extends Application {
         return itemDetails;
     }
 
-    // Displays the buy/sell items page.
+    /**
+     * Displays the "Buy/Sell Items" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showBuySellItemsPage(Stage stage) throws Exception {
         stage.setTitle("Buy/Sell Items");
 
@@ -508,7 +545,12 @@ public class App extends Application {
         stage.show();
     }
 
-    // Returns the details of a given item as a string. Used by `showEditRestockSettingsPage`.
+    /**
+     * Returns the details of a given item as a string, for use in the "Edit Restock Settings" page.
+     * @param item the item to show the details of
+     * @param restockSettings the restock settings of the item
+     * @return the details of the item as a string
+     */
     private static String getItemDetailsForShowEditRestockSettingsPage(Clothing item, RestockSettings restockSettings) {
         return String.format(
             "Name: %s\nBrand: %s\nCurrent Stock Quantity: %d\nMinimum Stock Quantity: %s",
@@ -519,7 +561,11 @@ public class App extends Application {
         );
     }
 
-    // Displays the edit restock settings page.
+    /**
+     * Displays the "Edit Restock Settings" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showEditRestockSettingsPage(Stage stage) throws Exception {
         stage.setTitle("Edit Restock Settings");
 
@@ -634,6 +680,12 @@ public class App extends Application {
         stage.show();
     }
 
+    /**
+     * Returns the details of a given item as a string, for use in printing to a file.
+     * @param item the item to show the details of
+     * @param restockSettings the restock settings of the item
+     * @return the details of the item as a string
+     */
     private String itemToFileString(Clothing item, RestockSettings restockSettings) {
         if (item instanceof TShirt) {
             TShirt tShirt = (TShirt) item;
@@ -789,7 +841,10 @@ public class App extends Application {
         return null;
     }
 
-    // Prints all given items to a file.
+    /**
+     * Prints all given items to the file "items.txt".
+     * @param items the items to print
+     */
     private void printItemsToFile(ArrayList<Clothing> items) {
         try {
             File file = new File("items.txt");
@@ -820,7 +875,11 @@ public class App extends Application {
         }
     }
 
-    // Prints one given item to a file.
+    /**
+     * Prints one given item to the file "item.txt".
+     * @param item the item to print
+     * @param restockSettings the restock settings of the item
+     */
     private void printItemToFile(Clothing item, RestockSettings restockSettings) {
         try {
             File file = new File("item.txt");
@@ -835,7 +894,12 @@ public class App extends Application {
         }
     }
 
-    // Displays the view items page.
+    /**
+     * Displays the "View Items" page.
+     * @param stage the `Stage` to display the page on
+     * @param searchQuery the search query to use
+     * @throws Exception if an error occurs
+     */
     private void showViewItemsPage(Stage stage, String searchQuery) throws Exception {
         stage.setTitle("View Items");
 
@@ -923,6 +987,11 @@ public class App extends Application {
         stage.show();
     }
 
+    /**
+     * Returns the details of a given item as a string, for use in the "Edit Prices" page.
+     * @param item the item to show the details of
+     * @return the details of the item as a string
+     */
     private String getItemDetailsForEditPricesPage(Clothing item) {
         return String.format(
             "Item ID: %d\n" +
@@ -936,7 +1005,11 @@ public class App extends Application {
         );
     }
 
-    // Displays the edit prices page.
+    /**
+     * Displays the "Edit Prices" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showEditPricesPage(Stage stage) throws Exception {
         stage.setTitle("Edit Prices");
 
@@ -1023,7 +1096,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the manage items page.
+    /**
+     * Displays the "Manage Items" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showManageItemsPage(Stage stage) throws Exception {
         stage.setTitle("Manage Items");
 
@@ -1089,7 +1166,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the main page.
+    /**
+     * Displays the "Main" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showMainPage(Stage stage) throws Exception {
         stage.setTitle("Main");
 
@@ -1149,7 +1230,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the log in page.
+    /**
+     * Displays the "Log In" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showLogInPage(Stage stage) throws Exception {
         stage.setTitle("Log In");
 
@@ -1210,8 +1295,12 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the account creation request page.
-    private void showCreateAccountRequestPage(Stage stage) throws Exception {
+    /**
+     * Displays the "Request Account Creation" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
+    private void displayRequestAccountCreationPage(Stage stage) throws Exception {
         stage.setTitle("Request Account Creation");
 
         GridPane grid = new GridPane();
@@ -1284,7 +1373,11 @@ public class App extends Application {
         stage.show();
     }
 
-    // Displays the start page.
+    /**
+     * Displays the "Start" page.
+     * @param stage the `Stage` to display the page on
+     * @throws Exception if an error occurs
+     */
     private void showStartPage(Stage stage) throws Exception {
         stage.setTitle("Stock Management System");
 
@@ -1311,7 +1404,7 @@ public class App extends Application {
         Button createAccountRequestButton = new Button("Request Account Creation");
         createAccountRequestButton.setOnAction(e -> {
             try {
-                showCreateAccountRequestPage(stage);
+                displayRequestAccountCreationPage(stage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

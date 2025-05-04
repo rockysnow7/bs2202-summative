@@ -28,6 +28,9 @@ import org.example.shoes.AthleticShoes;
 import org.example.shoes.DressShoes;
 import org.example.shoes.Shoes;
 
+/**
+ * A class that handles the connection to and interaction with the database.
+ */
 public class DatabaseConnection {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/clothingstore";
     private static final String DB_USER = "root";
@@ -42,7 +45,10 @@ public class DatabaseConnection {
         }
     }
     
-    // Connects to the database.
+    /**
+     * Opens a connection to the database.
+     * @throws SQLException if the connection fails
+     */
     private void connect() throws SQLException {
         Properties connectionProps = new Properties();
         connectionProps.put("user", DB_USER);
@@ -53,7 +59,11 @@ public class DatabaseConnection {
         System.out.println("Database connection established successfully");
     }
 
-    // Returns a connection to the database. If the connection is not already established, it will establish a new connection.
+    /**
+     * Gets the connection to the database. If the connection is closed, it will attempt to reconnect.
+     * @return a connection to the database
+     * @throws SQLException if the connection fails
+     */
     private Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             connect();
@@ -61,7 +71,12 @@ public class DatabaseConnection {
         return connection;
     }
     
-    // Creates a new user in the `users` table.
+    /**
+     * Creates a new user in the `users` table.
+     * @param username the username of the user
+     * @param passwordHash the password hash of the user
+     * @param userType the type of user
+     */
     private void createUser(String username, String passwordHash, UserType userType) {
         try {
             String query = "INSERT INTO users (username, password_hash, user_type) VALUES (?, ?, ?)";
@@ -76,7 +91,10 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns a list of all users in the `users` table.
+    /**
+     * Returns a list of all users in the `users` table.
+     * @return a list of all users
+     */
     public ArrayList<User> getAllUsers() {
         try {
             String query = "SELECT * FROM users";
@@ -95,7 +113,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the type of user for the given user ID in the `users` table.
+    /**
+     * Returns the type of user for the given user ID in the `users` table.
+     * @param userId the ID of the user
+     * @return the type of user
+     */
     public UserType getUserTypeOfUser(int userId) {
         try {
             String query = "SELECT user_type FROM users WHERE user_id = ?";
@@ -111,7 +133,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Sets the type of user for the given user ID in the `users` table.
+    /**
+     * Sets the type of user for the given user ID in the `users` table.
+     * @param userId the ID of the user
+     * @param userType the type of user
+     */
     public void setUserTypeOfUser(int userId, UserType userType) {
         try {
             String query = "UPDATE users SET user_type = ? WHERE user_id = ?";
@@ -125,7 +151,12 @@ public class DatabaseConnection {
         }
     }
 
-    // Tests if a user exists with the given username and password hash in the `users` table. Returns the user ID if the user exists, -1 otherwise.
+    /**
+     * Tests if a user exists with the given username and password hash in the `users` table.
+     * @param username the username of the user
+     * @param passwordHash the password hash of the user
+     * @return the user ID if the user exists, -1 otherwise
+     */
     public int validateLogin(String username, String passwordHash) {
         try {
             String query = "SELECT * FROM users WHERE username = ? AND password_hash = ?";
@@ -142,7 +173,10 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns a list of all account creation requests in the `account_creation_requests` table. The password hash is null because it is not needed for the user to see it.
+    /**
+     * Gets all account creation requests from the `account_creation_requests` table.
+     * @return a list of all account creation requests
+     */
     public ArrayList<AccountCreationRequest> getAllAccountCreationRequests() {
         try {
             String query = "SELECT request_id, username FROM account_creation_requests";
@@ -152,7 +186,8 @@ public class DatabaseConnection {
                     while (resultSet.next()) {
                         int requestId = resultSet.getInt("request_id");
                         String username = resultSet.getString("username");
-                        requests.add(new AccountCreationRequest(requestId, username, null));
+                        String passwordHash = resultSet.getString("password_hash");
+                        requests.add(new AccountCreationRequest(requestId, username, passwordHash));
                     }
                     return requests;
                 }
@@ -163,7 +198,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the account creation request in the `account_creation_requests` table with the given request ID.
+    /**
+     * Gets the account creation request from the `account_creation_requests` table with the given request ID.
+     * @param requestId the ID of the account creation request
+     * @return the account creation request
+     */
     private AccountCreationRequest getAccountCreationRequest(int requestId) {
         try {
             String query = "SELECT request_id, username, password_hash FROM account_creation_requests WHERE request_id = ?";
@@ -179,7 +218,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Creates a new account creation request in the `account_creation_requests` table with the given username and password hash.
+    /**
+     * Creates a new account creation request in the `account_creation_requests` table with the given username and password hash.
+     * @param username the username of the user
+     * @param passwordHash the password hash of the user
+     */
     public void createAccountCreationRequest(String username, String passwordHash) {
         try {
             String query = "INSERT INTO account_creation_requests (username, password_hash) VALUES (?, ?)";
@@ -193,7 +236,10 @@ public class DatabaseConnection {
         }
     }
 
-    // Deletes the account creation request in the `account_creation_requests` table with the given request ID.
+    /**
+     * Deletes the account creation request in the `account_creation_requests` table with the given request ID.
+     * @param requestId the ID of the account creation request
+     */
     private void deleteAccountCreationRequest(int requestId) {
         try {
             String query = "DELETE FROM account_creation_requests WHERE request_id = ?";
@@ -206,7 +252,10 @@ public class DatabaseConnection {
         }
     }
 
-    // Approves the account creation request in the `account_creation_requests` table with the given request ID.
+    /**
+     * Creates a new user in the `users` table from the account creation request in the `account_creation_requests` table with the given request ID and deletes the account creation request.
+     * @param requestId the ID of the account creation request
+     */
     public void approveAccountCreationRequest(int requestId) {
         AccountCreationRequest request = getAccountCreationRequest(requestId);
         if (request == null) {
@@ -218,12 +267,19 @@ public class DatabaseConnection {
         deleteAccountCreationRequest(requestId);
     }
 
-    // Denies the account creation request in the `account_creation_requests` table with the given request ID.
+    /**
+     * Deletes the account creation request in the `account_creation_requests` table with the given request ID without creating a user.
+     * @param requestId the ID of the account creation request
+     */
     public void denyAccountCreationRequest(int requestId) {
         deleteAccountCreationRequest(requestId);
     }
 
-    // Returns the restock settings for the given item ID in the `restock_settings` table.
+    /**
+     * Gets the restock settings for the given item ID in the `restock_settings` table.
+     * @param itemId the ID of the item
+     * @return the restock settings
+     */
     public RestockSettings getRestockSettings(int itemId) {
         try {
             String query = "SELECT * FROM restock_settings WHERE item_id = ?";
@@ -283,7 +339,26 @@ public class DatabaseConnection {
         return restockSettings.minimumStockQuantity;
     }
 
-    // Returns the `TShirt` object for the given item ID in the `t_shirts` table.
+    /**
+     * Gets the `TShirt` object for the given item ID in the `t_shirts` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @param sleeveType the sleeve type of the item
+     * @param neckType the neck type of the item
+     * @param pattern the pattern of the item
+     * @param numPockets the number of pockets on the item
+     * @return the `TShirt` object
+     */
     private TShirt getTShirt(
         int itemId,
         String name,
@@ -340,7 +415,26 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `ButtonUpShirt` object for the given item ID in the `button_up_shirts` table.
+    /**
+     * Gets the `ButtonUpShirt` object for the given item ID in the `button_up_shirts` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @param sleeveType the sleeve type of the item
+     * @param neckType the neck type of the item
+     * @param pattern the pattern of the item
+     * @param numPockets the number of pockets on the item
+     * @return the `ButtonUpShirt` object
+     */
     private ButtonUpShirt getButtonUpShirt(
         int itemId,
         String name,
@@ -397,7 +491,22 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `Shirt` object for the given item ID in the `shirts` table.
+    /**
+     * Gets the `Shirt` object for the given item ID in the `shirts` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @return the `Shirt` object
+     */
     private Shirt getShirt(
         int itemId,
         String name,
@@ -477,7 +586,25 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `DressShoes` object for the given item ID in the `dress_shoes` table.
+    /**
+     * Gets the `DressShoes` object for the given item ID in the `dress_shoes` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @param soleType the sole type of the item
+     * @param closureType the closure type of the item
+     * @param heelHeight the heel height of the item
+     * @return the `DressShoes` object
+     */
     private DressShoes getDressShoes(
         int itemId,
         String name,
@@ -532,7 +659,25 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `AthleticShoes` object for the given item ID in the `athletic_shoes` table.
+    /**
+     * Gets the `AthleticShoes` object for the given item ID in the `athletic_shoes` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @param soleType the sole type of the item
+     * @param closureType the closure type of the item
+     * @param heelHeight the heel height of the item
+     * @return the `AthleticShoes` object
+     */
     private AthleticShoes getAthleticShoes(
         int itemId,
         String name,
@@ -587,7 +732,22 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `Shoes` object for the given item ID in the `shoes` table.
+    /**
+     * Gets the `Shoes` object for the given item ID in the `shoes` table, using the given parameters.
+     * @param itemId the ID of the item
+     * @param name the display name of the item
+     * @param brand the name of the brand of the item
+     * @param size the size of the item
+     * @param colour the colour of the item
+     * @param material the material of the item
+     * @param dateLastBought the date the item was last bought
+     * @param stockQuantity the stock quantity of the item
+     * @param cost the cost price of the item
+     * @param price the selling price of the item
+     * @param restockSettings the restock settings of the item
+     * @param imagePath the path to the image of the item
+     * @return the `Shoes` object
+     */
     private Shoes getShoes(
         int itemId,
         String name,
@@ -664,7 +824,10 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns a list of all items in the `items` table.
+    /**
+     * Returns a list of all items in the `items` table.
+     * @return a list of all items
+     */
     public ArrayList<Clothing> getAllItems() {
         try {
             String query = "SELECT * FROM items";
@@ -737,7 +900,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Returns the `Clothing` object for the given item ID in the `items` table.
+    /**
+     * Returns the `Clothing` object for the given item ID in the `items` table.
+     * @param id the ID of the item
+     * @return the `Clothing` object
+     */
     public Clothing getItemById(int id) {
         String query = "SELECT * FROM items WHERE item_id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
@@ -805,7 +972,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Sets the price of the item with the given item ID in the `items` table to the given price.
+    /**
+     * Sets the price of the item with the given item ID in the `items` table to the given price.
+     * @param itemId the ID of the item
+     * @param price the new price of the item
+     */
     public void updateItemPrice(int itemId, double price) {
         try {
             String query = "UPDATE items SET price = ? WHERE item_id = ?";
@@ -819,7 +990,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Increases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
+    /**
+     * Increases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
+     * @param itemId the ID of the item
+     * @param quantity the quantity to increase the stock by
+     */
     public void buyItem(int itemId, int quantity) {
         try {
             String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity + ? WHERE item_id = ?";
@@ -839,7 +1014,11 @@ public class DatabaseConnection {
         }
     }
 
-    // Decreases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
+    /**
+     * Decreases the stock quantity of the item with the given item ID in the `items` table by the given quantity.
+     * @param itemId the ID of the item
+     * @param quantity the quantity to decrease the stock by
+     */
     public void sellItem(int itemId, int quantity) {
         try {
             String quantityQuery = "UPDATE items SET stock_quantity = stock_quantity - ? WHERE item_id = ?";

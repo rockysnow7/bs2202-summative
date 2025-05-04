@@ -2,8 +2,10 @@ package org.example.clothing;
 
 import java.time.LocalDate;
 import org.example.settings.RestockSettings;
-import org.example.enums.FormalityLevel;
 
+/**
+ * Abstract class representing a clothing item.
+ */
 public abstract class Clothing {
     public int id;
     public String name;
@@ -45,6 +47,4 @@ public abstract class Clothing {
         this.restockSettings = restockSettings;
         this.imagePath = imagePath;
     }
-
-    public abstract FormalityLevel getFormalityLevel();
 }
