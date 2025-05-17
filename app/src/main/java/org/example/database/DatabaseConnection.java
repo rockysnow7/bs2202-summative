@@ -32,12 +32,14 @@ import org.example.shoes.Shoes;
  * A class that handles the connection to and interaction with the database.
  */
 public class DatabaseConnection {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/clothingstore";
+    private String dbURL;
     private static final String DB_USER = "root";
     
     private Connection connection;
 
-    public DatabaseConnection() {
+    public DatabaseConnection(String dbName) {
+        this.dbURL = "jdbc:mysql://localhost:3306/" + dbName;
+
         try {
             connect();
         } catch (SQLException e) {
@@ -55,7 +57,7 @@ public class DatabaseConnection {
         connectionProps.put("useSSL", "false");
         connectionProps.put("serverTimezone", "UTC");
         
-        connection = DriverManager.getConnection(DB_URL, connectionProps);
+        connection = DriverManager.getConnection(dbURL, connectionProps);
         System.out.println("Database connection established successfully");
     }
 
@@ -88,6 +90,24 @@ public class DatabaseConnection {
             }
         } catch (SQLException e) {
             System.err.println("Error creating user: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Deletes a user from the `users` table.
+     * @param userId the ID of the user to delete
+     */
+    private void deleteUser(int userId) {
+        try {
+            String query = "DELETE FROM users WHERE user_id = ?";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                statement.setInt(1, userId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error deleting user: " + e.getMessage());
         }
     }
 
@@ -186,8 +206,7 @@ public class DatabaseConnection {
                     while (resultSet.next()) {
                         int requestId = resultSet.getInt("request_id");
                         String username = resultSet.getString("username");
-                        String passwordHash = resultSet.getString("password_hash");
-                        requests.add(new AccountCreationRequest(requestId, username, passwordHash));
+                        requests.add(new AccountCreationRequest(requestId, username, null));
                     }
                     return requests;
                 }

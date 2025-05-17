@@ -50,7 +50,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class App extends Application {
-    DatabaseConnection databaseConnection = new DatabaseConnection();
+    DatabaseConnection databaseConnection = new DatabaseConnection("clothingstore");
     /**
      * The ID of the currently logged in user. If no user is logged in, it is -1.
      */
@@ -396,6 +396,15 @@ public class App extends Application {
     }
 
     /**
+     * Returns true if the given quantity is a valid amount of an item to have, for buying, selling, or restocking.
+     * @param quantity the quantity to check
+     * @return true if the quantity is valid, false otherwise
+     */
+    private static boolean isValidQuantity(int quantity) {
+        return quantity > 0;
+    }
+
+    /**
      * Displays the "Buy/Sell Items" page.
      * @param stage the `Stage` to display the page on
      * @throws Exception if an error occurs
@@ -448,7 +457,7 @@ public class App extends Application {
             buyButton.setOnAction(e -> {
                 try {
                     int buyQuantity = Integer.parseInt(buyQuantityInput.getText());
-                    if (buyQuantity < 0) {
+                    if (!isValidQuantity(buyQuantity)) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error");
                         alert.setHeaderText("Quantity cannot be negative.");
@@ -491,7 +500,7 @@ public class App extends Application {
             sellButton.setOnAction(e -> {
                 try {
                     int sellQuantity = Integer.parseInt(sellQuantityInput.getText());
-                    if (sellQuantity < 0) {
+                    if (!isValidQuantity(sellQuantity)) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error");
                         alert.setHeaderText("Quantity cannot be negative.");
