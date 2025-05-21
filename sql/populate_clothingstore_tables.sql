@@ -27,18 +27,23 @@ VALUES
 INSERT INTO items
 VALUES
     (1, 'SHIRT', 'Red T-Shirt', 'Superdry', 10, 'Red', 'Cotton', '2025-04-01', 3, 8.00, 10.00, 't-shirt1.png'),
-    (2, 'SHOES', 'Brown Dress Shoes', 'Gucci', 5, 'Brown', 'Leather', '2025-04-20', 1, 80.00, 100.00, 'dress-shoes1.png');
+    (2, 'SHIRT', 'Fancy Button-Up', 'Gucci', 6, 'Beige', 'Cotton', '2025-05-20', 1, 100.00, 120.00, 'button-up1.png'),
+    (3, 'SHOES', 'Brown Dress Shoes', 'Gucci', 5, 'Brown', 'Leather', '2025-04-20', 1, 80.00, 100.00, 'dress-shoes1.png'),
+    (4, 'SHOES', 'Running Shoes', 'Nike', 10, 'Black', 'Rubber', '2025-05-20', 2, 45.00, 50.00, 'running-shoes1.png');
 
 /* populate restock_settings table */
 INSERT INTO restock_settings
 VALUES
     (1, FALSE, 0),
-    (2, FALSE, 0);
+    (2, FALSE, 0),
+    (3, FALSE, 0),
+    (4, FALSE, 0);
 
 /* populate shirts table */
 INSERT INTO shirts
 VALUES
-    (1, 'T_SHIRT', 'SHORT', 'V_NECK', 'Plain', 1);
+    (1, 'T_SHIRT', 'SHORT', 'V_NECK', 'Plain', 1),
+    (2, 'BUTTON_UP', 'LONG', 'COLLARED', 'Plaid', 2);
 
 /* populate t_shirts table */
 INSERT INTO t_shirts
@@ -46,15 +51,22 @@ VALUES
     (1, FALSE);
 
 /* populate button_up_shirts table */
+INSERT INTO button_up_shirts
+VALUES
+    (2, 'FRENCH');
 
 /* populate shoes table */
 INSERT INTO shoes
 VALUES
-    (2, 'DRESS_SHOES', 'LEATHER', 'LACES', 'LOW');
+    (3, 'DRESS_SHOES', 'LEATHER', 'LACES', 'LOW'),
+    (4, 'ATHLETIC_SHOES', 'RUBBER', 'LACES', 'LOW');
 
 /* populate athletic_shoes table */
+INSERT INTO athletic_shoes
+VALUES
+    (4, 'Running');
 
 /* populate dress_shoes table */
 INSERT INTO dress_shoes
 VALUES
-    (2, 'ROUND');
+    (3, 'ROUND');
