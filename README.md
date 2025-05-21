@@ -2,6 +2,8 @@
 
 This project is a stock management system for a clothing store.
 
+This code can also be found on [GitHub](https://github.com/rockysnow7/bs2202-summative) (my account).
+
 ## Unix-like Environment Setup
 
 To set up the project in a Unix-like environment, run the following commands in a terminal:
